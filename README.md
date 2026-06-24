@@ -54,7 +54,6 @@ src/
     storage.ts         # localStorage save/load/reset
     mockSubmit.ts      # latency + random success/failure
     fieldFactory.ts    # default field per type, unique-name helpers
-    demoSchema.ts      # seeded starter form
   store/
     useBuilderStore.ts  # zustand: fields, selection, title; add/remove/move/update
   components/

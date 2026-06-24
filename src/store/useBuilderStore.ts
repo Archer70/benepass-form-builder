@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { FieldType, FormField, FormSchema } from '@/lib/types'
 import { createDefaultField } from '@/lib/fieldFactory'
-import { demoSchema, emptySchema } from '@/lib/demoSchema'
+
+const DEFAULT_TITLE = 'Untitled form'
 
 interface BuilderState {
   title: string
@@ -24,9 +25,9 @@ interface BuilderState {
 }
 
 export const useBuilderStore = create<BuilderState>((set, get) => ({
-  title: demoSchema.title,
-  fields: demoSchema.fields,
-  selectedId: demoSchema.fields[0]?.id ?? null,
+  title: DEFAULT_TITLE,
+  fields: [],
+  selectedId: null,
 
   getSchema: () => ({
     version: 1,
@@ -75,8 +76,5 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
       selectedId: schema.fields[0]?.id ?? null,
     }),
 
-  reset: () => {
-    const empty = emptySchema()
-    set({ title: empty.title, fields: empty.fields, selectedId: null })
-  },
+  reset: () => set({ title: DEFAULT_TITLE, fields: [], selectedId: null }),
 }))
