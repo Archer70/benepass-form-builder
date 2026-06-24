@@ -19,7 +19,7 @@ import { FIELD_TYPE_LABELS, OPTION_FIELD_TYPES, type FormField } from '@/lib/typ
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <h3 className="text-xs font-bold uppercase tracking-[0.08em] text-foreground">
       {children}
     </h3>
   )
@@ -47,10 +47,12 @@ export function PropertiesPanel() {
   const isOptionField = OPTION_FIELD_TYPES.includes(field.type)
 
   return (
-    <div className="space-y-5 p-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-5">
+      <div className="flex items-center gap-2">
         <SectionLabel>Field properties</SectionLabel>
-        <Badge variant="outline">{FIELD_TYPE_LABELS[field.type]}</Badge>
+        <Badge variant="secondary" className="font-normal">
+          {FIELD_TYPE_LABELS[field.type]}
+        </Badge>
       </div>
 
       {/* Basics */}

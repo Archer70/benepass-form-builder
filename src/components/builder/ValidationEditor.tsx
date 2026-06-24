@@ -71,7 +71,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
             <Label htmlFor={`regex-${field.id}`}>Regex pattern</Label>
             <Input
               id={`regex-${field.id}`}
-              className="font-mono text-xs"
+              className="font-mono text-xs placeholder:text-muted-foreground/50"
               placeholder="^[a-z]+$"
               value={v.regex?.pattern ?? ''}
               onChange={(e) => {
@@ -106,7 +106,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
             <Label htmlFor={`custom-${field.id}`}>Custom rule</Label>
             <Input
               id={`custom-${field.id}`}
-              className="font-mono text-xs"
+              className="font-mono text-xs placeholder:text-muted-foreground/50"
               placeholder='value !== "forbidden"'
               value={v.custom?.expression ?? ''}
               onChange={(e) => {

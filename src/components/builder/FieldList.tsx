@@ -48,7 +48,7 @@ export function FieldList() {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {fields.map((field) => (
             <SortableFieldItem
               key={field.id}
