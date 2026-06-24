@@ -14,6 +14,7 @@ import {
 } from '@dnd-kit/sortable'
 import { Inbox } from 'lucide-react'
 import { SortableFieldItem } from './SortableFieldItem'
+import { EmptyState } from './EmptyState'
 import { useBuilderStore } from '@/store/useBuilderStore'
 
 export function FieldList() {
@@ -37,11 +38,11 @@ export function FieldList() {
 
   if (fields.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-8 text-center text-muted-foreground">
-        <Inbox className="size-8" />
-        <p className="text-sm">No fields yet.</p>
-        <p className="text-xs">Add one from the palette above to get started.</p>
-      </div>
+      <EmptyState
+        icon={Inbox}
+        title="No fields yet."
+        description="Add one from the palette above to get started."
+      />
     )
   }
 

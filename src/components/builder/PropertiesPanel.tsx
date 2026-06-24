@@ -3,7 +3,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge'
 import {
   Select,
   SelectContent,
@@ -14,8 +13,9 @@ import {
 import { OptionsEditor } from './OptionsEditor'
 import { ValidationEditor } from './ValidationEditor'
 import { ConditionalEditor } from './ConditionalEditor'
+import { EmptyState } from './EmptyState'
 import { useBuilderStore } from '@/store/useBuilderStore'
-import { FIELD_TYPE_LABELS, OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
+import { OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -33,12 +33,7 @@ export function PropertiesPanel() {
   const field = fields.find((f) => f.id === selectedId)
 
   if (!field) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-muted-foreground">
-        <Settings2 className="size-8" />
-        <p className="text-sm">Select a field to edit its properties.</p>
-      </div>
-    )
+    return <EmptyState icon={Settings2} title="Select a field to edit its properties." />
   }
 
   const onUpdate = (patch: Partial<FormField>) => updateField(field.id, patch)
@@ -47,14 +42,7 @@ export function PropertiesPanel() {
   const isOptionField = OPTION_FIELD_TYPES.includes(field.type)
 
   return (
-    <div className="space-y-6 p-5">
-      <div className="flex items-center gap-2">
-        <SectionLabel>Field properties</SectionLabel>
-        <Badge variant="secondary" className="font-normal">
-          {FIELD_TYPE_LABELS[field.type]}
-        </Badge>
-      </div>
-
+    <div className="space-y-6">
       {/* Basics */}
       <div className="space-y-3">
         <div className="space-y-1.5">

@@ -3,8 +3,10 @@ import { LayoutTemplate, Smartphone, Tablet, Monitor, type LucideIcon } from 'lu
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
+import { FIELD_TYPE_LABELS } from '@/lib/types'
 import { BuilderToolbar } from '@/components/builder/BuilderToolbar'
 import { FieldPalette } from '@/components/builder/FieldPalette'
 import { FieldList } from '@/components/builder/FieldList'
@@ -23,7 +25,10 @@ const VIEWPORTS: { id: ViewportId; label: string; icon: LucideIcon; width: strin
 function App() {
   const title = useBuilderStore((s) => s.title)
   const fields = useBuilderStore((s) => s.fields)
+  const selectedId = useBuilderStore((s) => s.selectedId)
   const [viewport, setViewport] = useState<ViewportId>('desktop')
+
+  const selectedField = fields.find((f) => f.id === selectedId)
 
   const schema = useMemo(() => ({ version: 1 as const, title, fields }), [title, fields])
   const previewWidth = VIEWPORTS.find((v) => v.id === viewport)!.width
@@ -69,7 +74,7 @@ function App() {
             <section className="flex min-h-0 flex-col gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Add a field</CardTitle>
+                  <CardTitle className="text-base">Add a Field</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <FieldPalette />
@@ -87,8 +92,20 @@ function App() {
             </section>
 
             <aside className="min-h-0">
-              <Card className="h-full overflow-y-auto py-0">
-                <PropertiesPanel />
+              <Card className="flex h-full min-h-0 flex-col">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-base">Field Properties</CardTitle>
+                    {selectedField && (
+                      <Badge variant="secondary" className="font-normal">
+                        {FIELD_TYPE_LABELS[selectedField.type]}
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="min-h-0 flex-1 overflow-y-auto">
+                  <PropertiesPanel />
+                </CardContent>
               </Card>
             </aside>
           </div>
