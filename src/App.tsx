@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { LayoutTemplate, Smartphone, Tablet, Monitor, type LucideIcon } from 'lucide-react'
+import { LayoutTemplate, Smartphone, Tablet, Monitor, Pencil, type LucideIcon } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -66,13 +66,16 @@ function App() {
           <div className="mx-auto grid h-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
             <Card className="flex min-h-0 flex-col">
               <CardHeader>
-                <Input
-                  aria-label="Form title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Untitled form"
-                  className="h-auto rounded-none border-0 border-b border-transparent bg-transparent px-0 py-1 text-lg font-semibold shadow-none transition-colors hover:border-border focus-visible:border-primary focus-visible:ring-0"
-                />
+                <div className="group relative">
+                  <Input
+                    aria-label="Form title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Untitled form"
+                    className="peer h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-1 pr-8 text-xl font-semibold shadow-none transition-colors hover:border-muted-foreground/50 focus-visible:border-primary focus-visible:ring-0"
+                  />
+                  <Pencil className="pointer-events-none absolute right-1 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground peer-focus-visible:text-primary" />
+                </div>
               </CardHeader>
               <CardContent className="min-h-0 flex-1 overflow-y-auto">
                 <FieldList />
