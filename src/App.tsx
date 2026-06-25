@@ -48,13 +48,19 @@ function App() {
       </header>
 
       <Tabs defaultValue="build" className="flex min-h-0 flex-1 flex-col gap-0">
-        <div className="border-b">
-          <div className="mx-auto max-w-6xl px-6 py-2">
+        <div className="bg-brand-navy">
+          <div className="mx-auto flex max-w-6xl justify-center px-6 py-2">
             <TabsList variant="line" className="gap-6">
-              <TabsTrigger value="build" className="flex-none px-0 text-base">
+              <TabsTrigger
+                value="build"
+                className="flex-none px-0 text-base text-white/60 hover:text-white"
+              >
                 Build
               </TabsTrigger>
-              <TabsTrigger value="preview" className="flex-none px-0 text-base">
+              <TabsTrigger
+                value="preview"
+                className="flex-none px-0 text-base text-white/60 hover:text-white"
+              >
                 Preview
               </TabsTrigger>
             </TabsList>
