@@ -28,6 +28,11 @@ describe('evaluateCustomRule', () => {
     expect(evaluateCustomRule('!(value === "x")', 'y')).toBe(true)
   })
 
+  it('relational operators are numeric and throw on non-numeric operands', () => {
+    expect(evaluateCustomRule('value.length > 3', 'abcd')).toBe(true)
+    expect(() => evaluateCustomRule('value > 3', 'abc')).toThrow()
+  })
+
   it('throws on malformed expressions', () => {
     expect(() => evaluateCustomRule('value &&&', 'x')).toThrow()
     expect(() => evaluateCustomRule('foo(bar)', 'x')).toThrow()

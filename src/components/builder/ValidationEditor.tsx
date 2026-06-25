@@ -3,6 +3,8 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import type { FormField, ValidationRules } from '@/lib/types'
 import { validateCustomExpression } from '@/lib/customRule'
+import { compileRegex } from '@/lib/buildZodSchema'
+import { parseNumberInput } from '@/lib/utils'
 
 interface Props {
   field: FormField
@@ -21,13 +23,9 @@ export function ValidationEditor({ field, onUpdate }: Props) {
     onUpdate({ validation: { ...v, ...patch } })
   }
 
-  function numOrUndef(raw: string): number | undefined {
-    if (raw.trim() === '') return undefined
-    const n = Number(raw)
-    return Number.isNaN(n) ? undefined : n
-  }
-
   const customError = validateCustomExpression(v.custom?.expression ?? '')
+  const regexError =
+    v.regex?.pattern && !compileRegex(v.regex.pattern) ? 'Invalid regular expression' : null
 
   return (
     <div className="space-y-4">
@@ -50,7 +48,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
               id={`min-${field.id}`}
               type="number"
               value={v.min ?? ''}
-              onChange={(e) => patchValidation({ min: numOrUndef(e.target.value) })}
+              onChange={(e) => patchValidation({ min: parseNumberInput(e.target.value) })}
             />
           </div>
           <div className="space-y-1.5">
@@ -59,7 +57,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
               id={`max-${field.id}`}
               type="number"
               value={v.max ?? ''}
-              onChange={(e) => patchValidation({ max: numOrUndef(e.target.value) })}
+              onChange={(e) => patchValidation({ max: parseNumberInput(e.target.value) })}
             />
           </div>
         </div>
@@ -81,6 +79,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
                 })
               }}
             />
+            {regexError && <p className="text-[11px] text-destructive">{regexError}</p>}
           </div>
           {v.regex?.pattern && (
             <div className="space-y-1.5">

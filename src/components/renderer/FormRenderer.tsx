@@ -64,7 +64,13 @@ export function FormRenderer({ schema }: { schema: FormSchema }) {
 
   async function onSubmit(data: Values) {
     setResult(null)
-    const res = await mockSubmit(data)
+    // Submit only currently-visible fields so stale values from hidden
+    // (conditional) fields don't leak into the payload.
+    const visibleNames = new Set(visibleFields(schema.fields, data).map((f) => f.name))
+    const payload = Object.fromEntries(
+      Object.entries(data).filter(([key]) => visibleNames.has(key)),
+    )
+    const res = await mockSubmit(payload)
     setResult(res)
   }
 

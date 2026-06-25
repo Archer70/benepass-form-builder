@@ -13,6 +13,10 @@
  *   primary     := '(' expr ')' | number | string | bool | value
  *   value       := 'value' ( '.length' )?
  *
+ * Equality (==, ===, !=, !==) is strict and type-aware. Relational operators
+ * (>, <, >=, <=) are numeric — non-numeric operands throw (and the caller
+ * treats a throwing rule as "valid", so a misconfigured rule never blocks).
+ *
  * Examples:
  *   value !== "forbidden"
  *   value.length >= 3 && value.length <= 20
@@ -202,22 +206,34 @@ class Parser {
   }
 }
 
+/** Coerce an operand to a number for relational comparison, or throw. */
+function toComparableNumber(v: Value): number {
+  const n = typeof v === 'number' ? v : Number(v)
+  if (Number.isNaN(n)) {
+    throw new Error('Relational operators (>, <, >=, <=) require numeric values')
+  }
+  return n
+}
+
 function compare(op: string, left: Value, right: Value): boolean {
   switch (op) {
+    // Equality is strict and type-aware (e.g. value !== "admin").
     case '===':
     case '==':
       return left === right
     case '!==':
     case '!=':
       return left !== right
+    // Relational operators are numeric; non-numeric operands throw rather than
+    // silently comparing strings lexicographically or yielding NaN.
     case '>':
-      return (left as number) > (right as number)
+      return toComparableNumber(left) > toComparableNumber(right)
     case '>=':
-      return (left as number) >= (right as number)
+      return toComparableNumber(left) >= toComparableNumber(right)
     case '<':
-      return (left as number) < (right as number)
+      return toComparableNumber(left) < toComparableNumber(right)
     case '<=':
-      return (left as number) <= (right as number)
+      return toComparableNumber(left) <= toComparableNumber(right)
     default:
       throw new Error(`Unknown operator: ${op}`)
   }

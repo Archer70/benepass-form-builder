@@ -8,6 +8,15 @@ function isEmpty(v: unknown): boolean {
   return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)
 }
 
+/** Compile a user-supplied regex pattern, returning null if it's invalid. */
+export function compileRegex(pattern: string): RegExp | null {
+  try {
+    return new RegExp(pattern)
+  } catch {
+    return null
+  }
+}
+
 /** Attach a custom-rule refinement, skipping evaluation for empty values. */
 function withCustomRule(schema: z.ZodTypeAny, field: FormField): z.ZodTypeAny {
   const custom = field.validation?.custom
@@ -37,12 +46,8 @@ function buildPresentSchema(field: FormField): z.ZodTypeAny {
       if (typeof v.min === 'number') s = s.min(v.min, `Must be at least ${v.min} characters`)
       if (typeof v.max === 'number') s = s.max(v.max, `Must be at most ${v.max} characters`)
       if (v.regex?.pattern) {
-        try {
-          const re = new RegExp(v.regex.pattern)
-          s = s.regex(re, v.regex.message || 'Invalid format')
-        } catch {
-          // Ignore invalid regex patterns rather than crashing the renderer.
-        }
+        const re = compileRegex(v.regex.pattern)
+        if (re) s = s.regex(re, v.regex.message || 'Invalid format')
       }
       return withCustomRule(s, field)
     }

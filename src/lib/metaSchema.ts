@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { FormSchema } from './types'
-import { FIELD_TYPES } from './types'
+import { FIELD_TYPES, OPTION_FIELD_TYPES, SCHEMA_VERSION } from './types'
+import { findDuplicateNames } from './fieldFactory'
 
 /**
  * A zod "schema of the schema": validates that imported JSON is a well-formed
@@ -52,20 +53,47 @@ const formFieldSchema = z.object({
 
 export const formSchemaMeta = z
   .object({
-    version: z.literal(1),
+    version: z.literal(SCHEMA_VERSION),
     title: z.string(),
     fields: z.array(formFieldSchema),
   })
   .superRefine((schema, ctx) => {
-    const names = schema.fields.map((f) => f.name)
-    const duplicates = names.filter((name, i) => names.indexOf(name) !== i)
-    if (duplicates.length > 0) {
+    const duplicateNames = findDuplicateNames(schema.fields)
+    if (duplicateNames.length > 0) {
       ctx.addIssue({
         code: 'custom',
-        message: `Duplicate field name(s): ${[...new Set(duplicates)].join(', ')}`,
+        message: `Duplicate field name(s): ${duplicateNames.join(', ')}`,
         path: ['fields'],
       })
     }
+
+    const ids = schema.fields.map((f) => f.id)
+    const duplicateIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]
+    if (duplicateIds.length > 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Duplicate field id(s): ${duplicateIds.join(', ')}`,
+        path: ['fields'],
+      })
+    }
+
+    const knownNames = new Set(schema.fields.map((f) => f.name))
+    schema.fields.forEach((field, i) => {
+      if (OPTION_FIELD_TYPES.includes(field.type) && !field.options?.length) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Field "${field.name}" (${field.type}) needs at least one option`,
+          path: ['fields', i, 'options'],
+        })
+      }
+      if (field.visibleWhen && !knownNames.has(field.visibleWhen.field)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `Field "${field.name}" has a visibility condition referencing unknown field "${field.visibleWhen.field}"`,
+          path: ['fields', i, 'visibleWhen', 'field'],
+        })
+      }
+    })
   })
 
 export interface ParseResult {
