@@ -66,10 +66,18 @@ export interface FormField {
   visibleWhen?: VisibilityCondition
 }
 
+/** Current schema format version. Bump when the shape changes. */
+export const SCHEMA_VERSION = 1
+
 export interface FormSchema {
-  version: 1
+  version: typeof SCHEMA_VERSION
   title: string
   fields: FormField[]
+}
+
+/** Build a `FormSchema` from a title + fields, stamping the current version. */
+export function createSchema(title: string, fields: FormField[]): FormSchema {
+  return { version: SCHEMA_VERSION, title, fields }
 }
 
 /** Field types that store their value as a list of option values. */

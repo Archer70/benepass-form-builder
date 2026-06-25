@@ -14,7 +14,7 @@ import { OptionsEditor } from './OptionsEditor'
 import { ValidationEditor } from './ValidationEditor'
 import { ConditionalEditor } from './ConditionalEditor'
 import { EmptyState } from './EmptyState'
-import { useBuilderStore } from '@/store/useBuilderStore'
+import { useBuilderStore, useSelectedField } from '@/store/useBuilderStore'
 import { OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -27,10 +27,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export function PropertiesPanel() {
   const fields = useBuilderStore((s) => s.fields)
-  const selectedId = useBuilderStore((s) => s.selectedId)
   const updateField = useBuilderStore((s) => s.updateField)
-
-  const field = fields.find((f) => f.id === selectedId)
+  const field = useSelectedField()
 
   if (!field) {
     return <EmptyState icon={Settings2} title="Select a field to edit its properties." />

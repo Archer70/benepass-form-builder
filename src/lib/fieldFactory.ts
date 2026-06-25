@@ -11,6 +11,17 @@ export function uniqueName(base: string, existing: string[]): string {
   return `${base}_${i}`
 }
 
+/** Return the set of field names that appear more than once. */
+export function findDuplicateNames(fields: { name: string }[]): string[] {
+  const seen = new Set<string>()
+  const duplicates = new Set<string>()
+  for (const { name } of fields) {
+    if (seen.has(name)) duplicates.add(name)
+    seen.add(name)
+  }
+  return [...duplicates]
+}
+
 /** Convert a label into a safe field name (snake_case, alphanumeric). */
 export function slugifyName(label: string): string {
   const slug = label

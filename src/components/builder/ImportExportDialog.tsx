@@ -17,9 +17,11 @@ import { parseFormSchema } from '@/lib/metaSchema'
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** When set, exporting is blocked (e.g. duplicate field names) and the reason shown. */
+  exportBlockReason?: string | null
 }
 
-export function ImportExportDialog({ open, onOpenChange }: Props) {
+export function ImportExportDialog({ open, onOpenChange, exportBlockReason }: Props) {
   const getSchema = useBuilderStore((s) => s.getSchema)
   const hydrate = useBuilderStore((s) => s.hydrate)
 
@@ -92,13 +94,23 @@ export function ImportExportDialog({ open, onOpenChange }: Props) {
           </TabsList>
 
           <TabsContent value="export" className="space-y-3">
+            {exportBlockReason && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                {exportBlockReason} — resolve it before exporting.
+              </p>
+            )}
             <Textarea readOnly value={exported} className="h-72 font-mono text-xs" />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={copyExport}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyExport}
+                disabled={!!exportBlockReason}
+              >
                 <Copy className="size-4" />
                 Copy
               </Button>
-              <Button size="sm" onClick={downloadExport}>
+              <Button size="sm" onClick={downloadExport} disabled={!!exportBlockReason}>
                 <Download className="size-4" />
                 Download .json
               </Button>

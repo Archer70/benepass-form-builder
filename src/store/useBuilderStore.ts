@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { FieldType, FormField, FormSchema } from '@/lib/types'
+import { createSchema } from '@/lib/types'
 import { createDefaultField } from '@/lib/fieldFactory'
 
 const DEFAULT_TITLE = 'Untitled form'
@@ -29,11 +30,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   fields: [],
   selectedId: null,
 
-  getSchema: () => ({
-    version: 1,
-    title: get().title,
-    fields: get().fields,
-  }),
+  getSchema: () => createSchema(get().title, get().fields),
 
   setTitle: (title) => set({ title }),
 
@@ -55,9 +52,24 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
     }),
 
   updateField: (id, patch) =>
-    set((state) => ({
-      fields: state.fields.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-    })),
+    set((state) => {
+      const target = state.fields.find((f) => f.id === id)
+      // When a field is renamed, keep any visibleWhen references pointing at it.
+      const rename =
+        target && typeof patch.name === 'string' && patch.name !== target.name && target.name
+          ? { from: target.name, to: patch.name }
+          : null
+
+      return {
+        fields: state.fields.map((f) => {
+          const updated = f.id === id ? { ...f, ...patch } : f
+          if (rename && updated.visibleWhen?.field === rename.from) {
+            return { ...updated, visibleWhen: { ...updated.visibleWhen, field: rename.to } }
+          }
+          return updated
+        }),
+      }
+    }),
 
   moveField: (activeId, overId) =>
     set((state) => {
@@ -78,3 +90,7 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   reset: () => set({ title: DEFAULT_TITLE, fields: [], selectedId: null }),
 }))
+
+/** The currently selected field, or undefined when nothing is selected. */
+export const useSelectedField = (): FormField | undefined =>
+  useBuilderStore((s) => s.fields.find((f) => f.id === s.selectedId))

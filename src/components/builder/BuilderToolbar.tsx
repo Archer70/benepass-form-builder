@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input'
 import { ImportExportDialog } from './ImportExportDialog'
 import { useBuilderStore } from '@/store/useBuilderStore'
 import { saveSchema, loadSchema, clearSchema } from '@/lib/storage'
+import { findDuplicateNames } from '@/lib/fieldFactory'
 
 export function BuilderToolbar() {
   const title = useBuilderStore((s) => s.title)
+  const fields = useBuilderStore((s) => s.fields)
   const setTitle = useBuilderStore((s) => s.setTitle)
   const getSchema = useBuilderStore((s) => s.getSchema)
   const hydrate = useBuilderStore((s) => s.hydrate)
@@ -16,7 +18,20 @@ export function BuilderToolbar() {
 
   const [ioOpen, setIoOpen] = useState(false)
 
+  // A schema with duplicate or empty field names would collapse value keys, so
+  // we block persisting/exporting until it's resolved.
+  const duplicateNames = findDuplicateNames(fields)
+  const nameIssue = duplicateNames.length
+    ? `Duplicate field name: ${duplicateNames.join(', ')}`
+    : fields.some((f) => !f.name.trim())
+      ? 'Every field needs a name'
+      : null
+
   function handleSave() {
+    if (nameIssue) {
+      toast.error(nameIssue)
+      return
+    }
     saveSchema(getSchema())
     toast.success('Saved to this browser')
   }
@@ -47,7 +62,13 @@ export function BuilderToolbar() {
         className="h-9 w-56 border-white/20 bg-white/10 text-base font-semibold text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-white/20"
       />
       <div className="flex-1" />
-      <Button size="sm" onClick={handleSave} className="bg-primary text-white hover:bg-[var(--bp-pink-dark)]">
+      <Button
+        size="sm"
+        onClick={handleSave}
+        disabled={!!nameIssue}
+        title={nameIssue ?? undefined}
+        className="bg-primary text-white hover:bg-[var(--bp-pink-dark)]"
+      >
         <Save className="size-4" />
         Save
       </Button>
@@ -80,7 +101,7 @@ export function BuilderToolbar() {
         Reset
       </Button>
 
-      <ImportExportDialog open={ioOpen} onOpenChange={setIoOpen} />
+      <ImportExportDialog open={ioOpen} onOpenChange={setIoOpen} exportBlockReason={nameIssue} />
     </div>
   )
 }

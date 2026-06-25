@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
-import { FIELD_TYPE_LABELS } from '@/lib/types'
+import { FIELD_TYPE_LABELS, createSchema } from '@/lib/types'
 import { BuilderToolbar } from '@/components/builder/BuilderToolbar'
 import { FieldPalette } from '@/components/builder/FieldPalette'
 import { FieldList } from '@/components/builder/FieldList'
 import { PropertiesPanel } from '@/components/builder/PropertiesPanel'
 import { FormRenderer } from '@/components/renderer/FormRenderer'
-import { useBuilderStore } from '@/store/useBuilderStore'
+import { useBuilderStore, useSelectedField } from '@/store/useBuilderStore'
 
 type ViewportId = 'mobile' | 'tablet' | 'desktop'
 
@@ -25,12 +25,13 @@ const VIEWPORTS: { id: ViewportId; label: string; icon: LucideIcon; width: strin
 function App() {
   const title = useBuilderStore((s) => s.title)
   const fields = useBuilderStore((s) => s.fields)
-  const selectedId = useBuilderStore((s) => s.selectedId)
+  const selectedField = useSelectedField()
   const [viewport, setViewport] = useState<ViewportId>('desktop')
 
-  const selectedField = fields.find((f) => f.id === selectedId)
-
-  const schema = useMemo(() => ({ version: 1 as const, title, fields }), [title, fields])
+  const schema = useMemo(() => createSchema(title, fields), [title, fields])
+  // Remount the preview form whenever the schema changes so RHF picks up new
+  // defaults/fields rather than holding stale mount-time values.
+  const schemaKey = useMemo(() => JSON.stringify(schema), [schema])
   const previewWidth = VIEWPORTS.find((v) => v.id === viewport)!.width
 
   return (
@@ -142,7 +143,7 @@ function App() {
                   <CardTitle>{title || 'Untitled form'}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <FormRenderer schema={schema} />
+                  <FormRenderer key={schemaKey} schema={schema} />
                 </CardContent>
               </Card>
             </div>
