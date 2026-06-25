@@ -14,8 +14,9 @@ import { OptionsEditor } from './OptionsEditor'
 import { ValidationEditor } from './ValidationEditor'
 import { ConditionalEditor } from './ConditionalEditor'
 import { EmptyState } from './EmptyState'
+import { FieldRow } from './FieldRow'
 import { useBuilderStore, useSelectedField } from '@/store/useBuilderStore'
-import { OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
+import { FIELD_CAPABILITIES, OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -36,24 +37,25 @@ export function PropertiesPanel() {
 
   const onUpdate = (patch: Partial<FormField>) => updateField(field.id, patch)
   const nameDuplicate = fields.some((f) => f.id !== field.id && f.name === field.name)
-  const showPlaceholder = ['text', 'textarea', 'number', 'date', 'select'].includes(field.type)
-  const isOptionField = OPTION_FIELD_TYPES.includes(field.type)
+  const caps = FIELD_CAPABILITIES[field.type]
 
   return (
     <div className="space-y-6">
       {/* Basics */}
       <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label htmlFor={`label-${field.id}`}>Label</Label>
+        <FieldRow label="Label" htmlFor={`label-${field.id}`}>
           <Input
             id={`label-${field.id}`}
             value={field.label}
             onChange={(e) => onUpdate({ label: e.target.value })}
           />
-        </div>
+        </FieldRow>
 
-        <div className="space-y-1.5">
-          <Label htmlFor={`name-${field.id}`}>Name (form key)</Label>
+        <FieldRow
+          label="Name (form key)"
+          htmlFor={`name-${field.id}`}
+          error={nameDuplicate ? 'Another field already uses this name. Names must be unique.' : null}
+        >
           <Input
             id={`name-${field.id}`}
             className="font-mono text-xs"
@@ -61,37 +63,30 @@ export function PropertiesPanel() {
             onChange={(e) => onUpdate({ name: e.target.value })}
             aria-invalid={nameDuplicate}
           />
-          {nameDuplicate && (
-            <p className="text-[11px] text-destructive">
-              Another field already uses this name. Names must be unique.
-            </p>
-          )}
-        </div>
+        </FieldRow>
 
-        {showPlaceholder && (
-          <div className="space-y-1.5">
-            <Label htmlFor={`placeholder-${field.id}`}>Placeholder</Label>
+        {caps.hasPlaceholder && (
+          <FieldRow label="Placeholder" htmlFor={`placeholder-${field.id}`}>
             <Input
               id={`placeholder-${field.id}`}
               value={field.placeholder ?? ''}
               onChange={(e) => onUpdate({ placeholder: e.target.value })}
             />
-          </div>
+          </FieldRow>
         )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor={`help-${field.id}`}>Help text</Label>
+        <FieldRow label="Help text" htmlFor={`help-${field.id}`}>
           <Input
             id={`help-${field.id}`}
             value={field.helpText ?? ''}
             onChange={(e) => onUpdate({ helpText: e.target.value })}
           />
-        </div>
+        </FieldRow>
 
         <DefaultValueControl field={field} onUpdate={onUpdate} />
       </div>
 
-      {isOptionField && field.options && (
+      {caps.hasOptions && field.options && (
         <>
           <Separator />
           <OptionsEditor options={field.options} onChange={(options) => onUpdate({ options })} />
@@ -136,8 +131,7 @@ function DefaultValueControl({
   if (OPTION_FIELD_TYPES.includes(field.type) && field.options) {
     const current = typeof field.defaultValue === 'string' ? field.defaultValue : ''
     return (
-      <div className="space-y-1.5">
-        <Label>Default value</Label>
+      <FieldRow label="Default value">
         <Select
           value={current || '__none__'}
           onValueChange={(value) =>
@@ -156,14 +150,13 @@ function DefaultValueControl({
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FieldRow>
     )
   }
 
   const inputType = field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor={`default-${field.id}`}>Default value</Label>
+    <FieldRow label="Default value" htmlFor={`default-${field.id}`}>
       <Input
         id={`default-${field.id}`}
         type={inputType}
@@ -176,6 +169,6 @@ function DefaultValueControl({
           onUpdate({ defaultValue: e.target.value === '' ? undefined : e.target.value })
         }
       />
-    </div>
+    </FieldRow>
   )
 }

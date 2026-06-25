@@ -80,8 +80,28 @@ export function createSchema(title: string, fields: FormField[]): FormSchema {
   return { version: SCHEMA_VERSION, title, fields }
 }
 
-/** Field types that store their value as a list of option values. */
-export const OPTION_FIELD_TYPES: FieldType[] = ['select', 'radio']
+export interface FieldCapabilities {
+  /** Field stores its value as one of a fixed set of options (select/radio). */
+  hasOptions: boolean
+  /** A free-text placeholder is meaningful for this field. */
+  hasPlaceholder: boolean
+}
+
+/** Single source of truth for per-type capabilities used across lib + UI. */
+export const FIELD_CAPABILITIES: Record<FieldType, FieldCapabilities> = {
+  text: { hasOptions: false, hasPlaceholder: true },
+  textarea: { hasOptions: false, hasPlaceholder: true },
+  number: { hasOptions: false, hasPlaceholder: true },
+  select: { hasOptions: true, hasPlaceholder: true },
+  radio: { hasOptions: true, hasPlaceholder: false },
+  checkbox: { hasOptions: false, hasPlaceholder: false },
+  date: { hasOptions: false, hasPlaceholder: true },
+}
+
+/** Field types that store their value as one of a fixed set of options. */
+export const OPTION_FIELD_TYPES: FieldType[] = FIELD_TYPES.filter(
+  (t) => FIELD_CAPABILITIES[t].hasOptions,
+)
 
 /** Human-readable labels for each field type, used across the builder UI. */
 export const FIELD_TYPE_LABELS: Record<FieldType, string> = {

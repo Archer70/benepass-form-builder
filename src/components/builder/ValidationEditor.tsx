@@ -1,10 +1,19 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { FieldRow } from './FieldRow'
 import type { FormField, ValidationRules } from '@/lib/types'
 import { validateCustomExpression } from '@/lib/customRule'
 import { compileRegex } from '@/lib/buildZodSchema'
 import { parseNumberInput } from '@/lib/utils'
+
+const CUSTOM_RULE_HINT = (
+  <>
+    Use <code className="font-mono">value</code> and{' '}
+    <code className="font-mono">value.length</code>, e.g.{' '}
+    <code className="font-mono">value.length &gt;= 3 &amp;&amp; value !== "admin"</code>
+  </>
+)
 
 interface Props {
   field: FormField
@@ -42,31 +51,28 @@ export function ValidationEditor({ field, onUpdate }: Props) {
 
       {supportsMinMax && (
         <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1.5">
-            <Label htmlFor={`min-${field.id}`}>{isNumber ? 'Min value' : 'Min length'}</Label>
+          <FieldRow label={isNumber ? 'Min value' : 'Min length'} htmlFor={`min-${field.id}`}>
             <Input
               id={`min-${field.id}`}
               type="number"
               value={v.min ?? ''}
               onChange={(e) => patchValidation({ min: parseNumberInput(e.target.value) })}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor={`max-${field.id}`}>{isNumber ? 'Max value' : 'Max length'}</Label>
+          </FieldRow>
+          <FieldRow label={isNumber ? 'Max value' : 'Max length'} htmlFor={`max-${field.id}`}>
             <Input
               id={`max-${field.id}`}
               type="number"
               value={v.max ?? ''}
               onChange={(e) => patchValidation({ max: parseNumberInput(e.target.value) })}
             />
-          </div>
+          </FieldRow>
         </div>
       )}
 
       {supportsRegex && (
         <div className="space-y-2">
-          <div className="space-y-1.5">
-            <Label htmlFor={`regex-${field.id}`}>Regex pattern</Label>
+          <FieldRow label="Regex pattern" htmlFor={`regex-${field.id}`} error={regexError}>
             <Input
               id={`regex-${field.id}`}
               className="font-mono text-xs placeholder:text-muted-foreground/50"
@@ -79,11 +85,9 @@ export function ValidationEditor({ field, onUpdate }: Props) {
                 })
               }}
             />
-            {regexError && <p className="text-[11px] text-destructive">{regexError}</p>}
-          </div>
+          </FieldRow>
           {v.regex?.pattern && (
-            <div className="space-y-1.5">
-              <Label htmlFor={`regex-msg-${field.id}`}>Regex error message</Label>
+            <FieldRow label="Regex error message" htmlFor={`regex-msg-${field.id}`}>
               <Input
                 id={`regex-msg-${field.id}`}
                 placeholder="Invalid format"
@@ -94,15 +98,19 @@ export function ValidationEditor({ field, onUpdate }: Props) {
                   })
                 }
               />
-            </div>
+            </FieldRow>
           )}
         </div>
       )}
 
       {supportsCustom && (
         <div className="space-y-2">
-          <div className="space-y-1.5">
-            <Label htmlFor={`custom-${field.id}`}>Custom rule</Label>
+          <FieldRow
+            label="Custom rule"
+            htmlFor={`custom-${field.id}`}
+            hint={CUSTOM_RULE_HINT}
+            error={customError}
+          >
             <Input
               id={`custom-${field.id}`}
               className="font-mono text-xs placeholder:text-muted-foreground/50"
@@ -111,22 +119,13 @@ export function ValidationEditor({ field, onUpdate }: Props) {
               onChange={(e) => {
                 const expression = e.target.value
                 patchValidation({
-                  custom: expression
-                    ? { expression, message: v.custom?.message }
-                    : undefined,
+                  custom: expression ? { expression, message: v.custom?.message } : undefined,
                 })
               }}
             />
-            <p className="text-[11px] text-muted-foreground">
-              Use <code className="font-mono">value</code> and{' '}
-              <code className="font-mono">value.length</code>, e.g.{' '}
-              <code className="font-mono">value.length &gt;= 3 &amp;&amp; value !== "admin"</code>
-            </p>
-            {customError && <p className="text-[11px] text-destructive">{customError}</p>}
-          </div>
+          </FieldRow>
           {v.custom?.expression && (
-            <div className="space-y-1.5">
-              <Label htmlFor={`custom-msg-${field.id}`}>Custom error message</Label>
+            <FieldRow label="Custom error message" htmlFor={`custom-msg-${field.id}`}>
               <Input
                 id={`custom-msg-${field.id}`}
                 placeholder="Invalid value"
@@ -137,7 +136,7 @@ export function ValidationEditor({ field, onUpdate }: Props) {
                   })
                 }
               />
-            </div>
+            </FieldRow>
           )}
         </div>
       )}

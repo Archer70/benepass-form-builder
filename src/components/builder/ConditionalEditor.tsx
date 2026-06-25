@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { FieldRow } from './FieldRow'
 import type { FormField, VisibilityOperator } from '@/lib/types'
 
 interface Props {
@@ -68,10 +69,9 @@ export function ConditionalEditor({ field, allFields, onUpdate }: Props) {
 
       {enabled && condition && (
         <div className="space-y-3 rounded-md border bg-muted/30 p-3">
-          <div className="space-y-1.5">
-            <Label>Field</Label>
+          <FieldRow label="Field" htmlFor={`cond-field-${field.id}`}>
             <Select value={condition.field} onValueChange={(value) => patch({ field: value })}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`cond-field-${field.id}`} className="w-full">
                 <SelectValue placeholder="Select a field" />
               </SelectTrigger>
               <SelectContent>
@@ -82,15 +82,14 @@ export function ConditionalEditor({ field, allFields, onUpdate }: Props) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </FieldRow>
 
-          <div className="space-y-1.5">
-            <Label>Condition</Label>
+          <FieldRow label="Condition" htmlFor={`cond-op-${field.id}`}>
             <Select
               value={condition.operator}
               onValueChange={(value) => patch({ operator: value as VisibilityOperator })}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger id={`cond-op-${field.id}`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -101,17 +100,19 @@ export function ConditionalEditor({ field, allFields, onUpdate }: Props) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </FieldRow>
 
           {condition.operator !== 'truthy' && (
-            <div className="space-y-1.5">
-              <Label>Value{condition.operator === 'in' && ' (comma-separated)'}</Label>
+            <FieldRow
+              label={`Value${condition.operator === 'in' ? ' (comma-separated)' : ''}`}
+              htmlFor={`cond-value-${field.id}`}
+            >
               {controller?.options && condition.operator !== 'in' ? (
                 <Select
                   value={typeof condition.value === 'string' ? condition.value : ''}
                   onValueChange={(value) => patch({ value })}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id={`cond-value-${field.id}`} className="w-full">
                     <SelectValue placeholder="Select a value" />
                   </SelectTrigger>
                   <SelectContent>
@@ -124,6 +125,7 @@ export function ConditionalEditor({ field, allFields, onUpdate }: Props) {
                 </Select>
               ) : (
                 <Input
+                  id={`cond-value-${field.id}`}
                   value={
                     Array.isArray(condition.value)
                       ? condition.value.join(', ')
@@ -141,7 +143,7 @@ export function ConditionalEditor({ field, allFields, onUpdate }: Props) {
                   }}
                 />
               )}
-            </div>
+            </FieldRow>
           )}
         </div>
       )}
