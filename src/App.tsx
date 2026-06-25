@@ -72,7 +72,7 @@ function App() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Untitled form"
-                    className="peer h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-1 pr-8 text-xl font-semibold shadow-none transition-colors hover:border-muted-foreground/50 focus-visible:border-primary focus-visible:ring-0"
+                    className="peer h-auto rounded-none border-0 border-b border-border bg-transparent px-0 py-1.5 pr-9 text-2xl font-semibold shadow-none transition-colors hover:border-muted-foreground/50 focus-visible:border-primary focus-visible:ring-0 md:text-2xl"
                   />
                   <Pencil className="pointer-events-none absolute right-1 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50 transition-colors group-hover:text-muted-foreground peer-focus-visible:text-primary" />
                 </div>
