@@ -30,12 +30,15 @@ export function FieldRenderer({ field, control, error }: Props) {
   const id = `field-${field.id}`
   const required = Boolean(field.required || field.validation?.required)
   const isCheckbox = field.type === 'checkbox'
+  // A radio group isn't a single labelable control, so it's associated via
+  // aria-labelledby (see RadioField) rather than htmlFor.
+  const isRadio = field.type === 'radio'
   const Control = CONTROLS[field.type]
 
   return (
     <div className="space-y-1.5">
       {!isCheckbox && (
-        <Label htmlFor={id}>
+        <Label id={`${id}-label`} htmlFor={isRadio ? undefined : id}>
           {field.label}
           {required && <span className="ml-0.5 text-destructive">*</span>}
         </Label>

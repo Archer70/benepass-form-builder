@@ -53,6 +53,9 @@ export function BuilderToolbar() {
     toast.success('Builder reset')
   }
 
+  // Shared styling for the secondary actions sitting on the navy header.
+  const navButton = 'border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white'
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Input
@@ -67,26 +70,16 @@ export function BuilderToolbar() {
         onClick={handleSave}
         disabled={!!nameIssue}
         title={nameIssue ?? undefined}
-        className="bg-primary text-white hover:bg-[var(--bp-pink-dark)]"
+        className="bg-primary text-white hover:bg-primary-hover"
       >
         <Save className="size-4" />
         Save
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleLoad}
-        className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-      >
+      <Button variant="outline" size="sm" onClick={handleLoad} className={navButton}>
         <FolderOpen className="size-4" />
         Load
       </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setIoOpen(true)}
-        className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
-      >
+      <Button variant="outline" size="sm" onClick={() => setIoOpen(true)} className={navButton}>
         <ArrowDownUp className="size-4" />
         Import / Export
       </Button>

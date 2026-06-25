@@ -7,11 +7,11 @@ export function SubmitStatus({ result }: { result: SubmitResult | null }) {
 
   return (
     <div
-      role="status"
+      role={result.ok ? 'status' : 'alert'}
       className={cn(
         'flex items-start gap-2 rounded-md border p-3 text-sm',
         result.ok
-          ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+          ? 'border-success/40 bg-success/10 text-success'
           : 'border-destructive/40 bg-destructive/10 text-destructive',
       )}
     >

@@ -36,7 +36,7 @@ function App() {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="bg-[var(--bp-navy)] px-4 py-4 text-white">
+      <header className="bg-brand-navy px-4 py-4 text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4">
           <div className="flex items-center gap-2.5">
             <LayoutTemplate className="size-6 text-primary" />
@@ -53,16 +53,10 @@ function App() {
         <div className="border-b bg-card px-4">
           <div className="mx-auto max-w-6xl py-2.5">
             <TabsList variant="line">
-              <TabsTrigger
-                value="build"
-                className="flex-none px-3.5 text-base after:bg-primary! data-[state=active]:text-primary"
-              >
+              <TabsTrigger value="build" className="flex-none px-3.5 text-base">
                 Build
               </TabsTrigger>
-              <TabsTrigger
-                value="preview"
-                className="flex-none px-3.5 text-base after:bg-primary! data-[state=active]:text-primary"
-              >
+              <TabsTrigger value="preview" className="flex-none px-3.5 text-base">
                 Preview
               </TabsTrigger>
             </TabsList>

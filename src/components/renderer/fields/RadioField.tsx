@@ -7,6 +7,7 @@ export function RadioField({ field, id, value, onChange }: FieldControlProps) {
     <RadioGroup
       value={typeof value === 'string' ? value : ''}
       onValueChange={onChange}
+      aria-labelledby={`${id}-label`}
       className="gap-2"
     >
       {(field.options ?? []).map((opt) => {
