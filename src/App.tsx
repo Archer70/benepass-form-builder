@@ -3,6 +3,7 @@ import { LayoutTemplate, Smartphone, Tablet, Monitor, type LucideIcon } from 'lu
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 import { createSchema } from '@/lib/types'
@@ -25,6 +26,7 @@ function App() {
   const title = useBuilderStore((s) => s.title)
   const fields = useBuilderStore((s) => s.fields)
   const addField = useBuilderStore((s) => s.addField)
+  const setTitle = useBuilderStore((s) => s.setTitle)
   const [viewport, setViewport] = useState<ViewportId>('desktop')
 
   const schema = useMemo(() => createSchema(title, fields), [title, fields])
@@ -35,16 +37,13 @@ function App() {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="bg-brand-navy px-4 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
-          <div className="flex items-center gap-2.5">
-            <LayoutTemplate className="size-6 text-primary" />
-            <h1 className="text-xl font-semibold text-white">Form Builder</h1>
-            <span className="hidden text-sm text-white/55 sm:inline">
-              Design, validate, and preview forms from a JSON schema
-            </span>
+      <header className="bg-brand-navy px-4 py-3 text-white">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-2">
+          <LayoutTemplate className="size-6 shrink-0 text-primary" />
+          <h1 className="text-xl font-semibold text-white">Form Builder</h1>
+          <div className="ml-auto">
+            <BuilderToolbar />
           </div>
-          <BuilderToolbar />
         </div>
       </header>
 
@@ -67,7 +66,13 @@ function App() {
           <div className="mx-auto grid h-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
             <Card className="flex min-h-0 flex-col">
               <CardHeader>
-                <CardTitle className="text-base">Fields</CardTitle>
+                <Input
+                  aria-label="Form title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Untitled form"
+                  className="h-auto rounded-none border-0 border-b border-transparent bg-transparent px-0 py-1 text-lg font-semibold shadow-none transition-colors hover:border-border focus-visible:border-primary focus-visible:ring-0"
+                />
               </CardHeader>
               <CardContent className="min-h-0 flex-1 overflow-y-auto">
                 <FieldList />

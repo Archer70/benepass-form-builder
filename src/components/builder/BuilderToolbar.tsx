@@ -2,16 +2,13 @@ import { useState } from 'react'
 import { Save, FolderOpen, RotateCcw, ArrowDownUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ImportExportDialog } from './ImportExportDialog'
 import { useBuilderStore } from '@/store/useBuilderStore'
 import { saveSchema, loadSchema, clearSchema } from '@/lib/storage'
 import { findDuplicateNames } from '@/lib/fieldFactory'
 
 export function BuilderToolbar() {
-  const title = useBuilderStore((s) => s.title)
   const fields = useBuilderStore((s) => s.fields)
-  const setTitle = useBuilderStore((s) => s.setTitle)
   const getSchema = useBuilderStore((s) => s.getSchema)
   const hydrate = useBuilderStore((s) => s.hydrate)
   const reset = useBuilderStore((s) => s.reset)
@@ -57,14 +54,7 @@ export function BuilderToolbar() {
   const navButton = 'border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white'
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Input
-        aria-label="Form title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="h-9 w-56 border-white/20 bg-white/10 text-base font-semibold text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-white/20"
-      />
-      <div className="flex-1" />
+    <div className="flex flex-wrap items-center justify-end gap-2">
       <Button
         size="sm"
         onClick={handleSave}
