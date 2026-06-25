@@ -41,7 +41,7 @@ export function FieldList() {
       <EmptyState
         icon={Inbox}
         title="No fields yet."
-        description="Add one from the palette above to get started."
+        description="Use the “Add field” button below to get started."
       />
     )
   }

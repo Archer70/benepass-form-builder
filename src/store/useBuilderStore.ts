@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { FieldType, FormField, FormSchema } from '@/lib/types'
 import { createSchema } from '@/lib/types'
-import { createDefaultField } from '@/lib/fieldFactory'
+import { createDefaultField, reconcileFieldType } from '@/lib/fieldFactory'
 
 const DEFAULT_TITLE = 'Untitled form'
 
@@ -19,6 +19,7 @@ interface BuilderState {
   addField: (type: FieldType) => void
   removeField: (id: string) => void
   updateField: (id: string, patch: Partial<FormField>) => void
+  changeFieldType: (id: string, type: FieldType) => void
   moveField: (activeId: string, overId: string) => void
   selectField: (id: string | null) => void
   hydrate: (schema: FormSchema) => void
@@ -70,6 +71,11 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
         }),
       }
     }),
+
+  changeFieldType: (id, type) =>
+    set((state) => ({
+      fields: state.fields.map((f) => (f.id === id ? reconcileFieldType(f, type) : f)),
+    })),
 
   moveField: (activeId, overId) =>
     set((state) => {

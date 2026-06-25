@@ -57,8 +57,8 @@ src/
   store/
     useBuilderStore.ts  # zustand: fields, selection, title; add/remove/move/update
   components/
-    builder/   # FieldPalette, FieldList + SortableFieldItem, PropertiesPanel,
-               # ValidationEditor, ConditionalEditor, OptionsEditor,
+    builder/   # FieldList + SortableFieldItem, PropertiesPanel, FieldRow,
+               # ValidationEditor, ConditionalEditor, OptionsEditor, EmptyState,
                # BuilderToolbar, ImportExportDialog
     renderer/  # FormRenderer, FieldRenderer, SubmitStatus, fields/<one per type>
     ui/        # shadcn/ui primitives

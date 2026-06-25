@@ -1,18 +1,16 @@
 import { useMemo, useState } from 'react'
-import { LayoutTemplate, Smartphone, Tablet, Monitor, type LucideIcon } from 'lucide-react'
+import { LayoutTemplate, Smartphone, Tablet, Monitor, Plus, type LucideIcon } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
-import { FIELD_TYPE_LABELS, createSchema } from '@/lib/types'
+import { createSchema } from '@/lib/types'
 import { BuilderToolbar } from '@/components/builder/BuilderToolbar'
-import { FieldPalette } from '@/components/builder/FieldPalette'
 import { FieldList } from '@/components/builder/FieldList'
 import { PropertiesPanel } from '@/components/builder/PropertiesPanel'
 import { FormRenderer } from '@/components/renderer/FormRenderer'
-import { useBuilderStore, useSelectedField } from '@/store/useBuilderStore'
+import { useBuilderStore } from '@/store/useBuilderStore'
 
 type ViewportId = 'mobile' | 'tablet' | 'desktop'
 
@@ -25,7 +23,7 @@ const VIEWPORTS: { id: ViewportId; label: string; icon: LucideIcon; width: strin
 function App() {
   const title = useBuilderStore((s) => s.title)
   const fields = useBuilderStore((s) => s.fields)
-  const selectedField = useSelectedField()
+  const addField = useBuilderStore((s) => s.addField)
   const [viewport, setViewport] = useState<ViewportId>('desktop')
 
   const schema = useMemo(() => createSchema(title, fields), [title, fields])
@@ -66,37 +64,29 @@ function App() {
         {/* Build */}
         <TabsContent value="build" className="m-0 min-h-0 flex-1">
           <div className="mx-auto grid h-full max-w-6xl grid-cols-1 gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-            <section className="flex min-h-0 flex-col gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Add a Field</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <FieldPalette />
-                </CardContent>
-              </Card>
-
-              <Card className="flex min-h-0 flex-1 flex-col">
-                <CardHeader>
-                  <CardTitle className="text-base">Fields</CardTitle>
-                </CardHeader>
-                <CardContent className="min-h-0 flex-1 overflow-y-auto">
-                  <FieldList />
-                </CardContent>
-              </Card>
-            </section>
+            <Card className="flex min-h-0 flex-col">
+              <CardHeader>
+                <CardTitle className="text-base">Fields</CardTitle>
+              </CardHeader>
+              <CardContent className="min-h-0 flex-1 overflow-y-auto">
+                <FieldList />
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full border-dashed hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                  onClick={() => addField('text')}
+                >
+                  <Plus className="size-4" />
+                  Add field
+                </Button>
+              </CardFooter>
+            </Card>
 
             <aside className="min-h-0">
               <Card className="flex h-full min-h-0 flex-col">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-base">Field Properties</CardTitle>
-                    {selectedField && (
-                      <Badge variant="secondary" className="font-normal">
-                        {FIELD_TYPE_LABELS[selectedField.type]}
-                      </Badge>
-                    )}
-                  </div>
+                  <CardTitle className="text-base">Field Properties</CardTitle>
                 </CardHeader>
                 <CardContent className="min-h-0 flex-1 overflow-y-auto">
                   <PropertiesPanel />

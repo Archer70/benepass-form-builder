@@ -1,6 +1,14 @@
 import { nanoid } from 'nanoid'
-import type { FieldType, FormField } from './types'
-import { FIELD_TYPE_LABELS, OPTION_FIELD_TYPES } from './types'
+import type { FieldOption, FieldType, FormField } from './types'
+import { FIELD_CAPABILITIES, FIELD_TYPE_LABELS } from './types'
+
+/** Two starter options for option-based fields (select/radio). */
+function defaultOptions(): FieldOption[] {
+  return [
+    { label: 'Option 1', value: 'option_1' },
+    { label: 'Option 2', value: 'option_2' },
+  ]
+}
 
 /** Generate a name that is unique among `existing` names, based on `base`. */
 export function uniqueName(base: string, existing: string[]): string {
@@ -51,11 +59,8 @@ export function createDefaultField(type: FieldType, existingNames: string[] = []
     validation: { required: false },
   }
 
-  if (OPTION_FIELD_TYPES.includes(type)) {
-    field.options = [
-      { label: 'Option 1', value: 'option_1' },
-      { label: 'Option 2', value: 'option_2' },
-    ]
+  if (FIELD_CAPABILITIES[type].hasOptions) {
+    field.options = defaultOptions()
   }
 
   if (type === 'checkbox') {
@@ -63,4 +68,23 @@ export function createDefaultField(type: FieldType, existingNames: string[] = []
   }
 
   return field
+}
+
+/**
+ * Change a field's type, reconciling type-specific props so the result stays
+ * coherent: option fields gain default options (if none), non-option fields
+ * drop them, and the default value resets to a valid shape for the new type.
+ */
+export function reconcileFieldType(field: FormField, type: FieldType): FormField {
+  if (field.type === type) return field
+  const next: FormField = { ...field, type }
+
+  if (FIELD_CAPABILITIES[type].hasOptions) {
+    next.options = field.options?.length ? field.options : defaultOptions()
+  } else {
+    delete next.options
+  }
+
+  next.defaultValue = type === 'checkbox' ? false : undefined
+  return next
 }

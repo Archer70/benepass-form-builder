@@ -16,7 +16,15 @@ import { ConditionalEditor } from './ConditionalEditor'
 import { EmptyState } from './EmptyState'
 import { FieldRow } from './FieldRow'
 import { useBuilderStore, useSelectedField } from '@/store/useBuilderStore'
-import { FIELD_CAPABILITIES, OPTION_FIELD_TYPES, type FormField } from '@/lib/types'
+import {
+  FIELD_CAPABILITIES,
+  FIELD_TYPES,
+  FIELD_TYPE_LABELS,
+  OPTION_FIELD_TYPES,
+  type FieldType,
+  type FormField,
+} from '@/lib/types'
+import { FIELD_ICONS } from '@/lib/fieldIcons'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -29,6 +37,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 export function PropertiesPanel() {
   const fields = useBuilderStore((s) => s.fields)
   const updateField = useBuilderStore((s) => s.updateField)
+  const changeFieldType = useBuilderStore((s) => s.changeFieldType)
   const field = useSelectedField()
 
   if (!field) {
@@ -43,6 +52,28 @@ export function PropertiesPanel() {
     <div className="space-y-6">
       {/* Basics */}
       <div className="space-y-3">
+        <FieldRow label="Field type" htmlFor={`type-${field.id}`}>
+          <Select
+            value={field.type}
+            onValueChange={(value) => changeFieldType(field.id, value as FieldType)}
+          >
+            <SelectTrigger id={`type-${field.id}`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FIELD_TYPES.map((t) => {
+                const Icon = FIELD_ICONS[t]
+                return (
+                  <SelectItem key={t} value={t}>
+                    <Icon className="size-4 text-muted-foreground" />
+                    {FIELD_TYPE_LABELS[t]}
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+        </FieldRow>
+
         <FieldRow label="Label" htmlFor={`label-${field.id}`}>
           <Input
             id={`label-${field.id}`}
