@@ -1,7 +1,8 @@
-import { Plus, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AddButton } from './AddButton'
 import { slugifyName } from '@/lib/fieldFactory'
 import type { FieldOption } from '@/lib/types'
 
@@ -27,12 +28,30 @@ export function OptionsEditor({ options, onChange }: Props) {
   return (
     <div className="space-y-2">
       <Label>Options</Label>
+      <p className="text-[11px] text-muted-foreground">
+        The <span className="font-medium text-foreground/70">label</span> is shown to people filling
+        out the form; the <span className="font-medium text-foreground/70">value</span> is what gets
+        stored when they pick it.
+      </p>
+
+      {/* Column headers, aligned with the inputs below. */}
+      <div className="flex items-center gap-2 px-1">
+        <span className="flex-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Label
+        </span>
+        <span className="flex-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          Value
+        </span>
+        <span className="w-8 shrink-0" aria-hidden />
+      </div>
+
       <div className="space-y-2">
         {options.map((opt, i) => (
           <div key={i} className="flex items-center gap-2">
             <Input
               aria-label={`Option ${i + 1} label`}
-              placeholder="Label"
+              placeholder="Shown to users"
+              className="flex-1"
               value={opt.label}
               onChange={(e) => {
                 const label = e.target.value
@@ -43,8 +62,8 @@ export function OptionsEditor({ options, onChange }: Props) {
             />
             <Input
               aria-label={`Option ${i + 1} value`}
-              placeholder="value"
-              className="font-mono text-xs"
+              placeholder="stored_value"
+              className="flex-1 font-mono text-xs placeholder:text-muted-foreground/50"
               value={opt.value}
               onChange={(e) => update(i, { value: e.target.value })}
             />
@@ -61,10 +80,8 @@ export function OptionsEditor({ options, onChange }: Props) {
           </div>
         ))}
       </div>
-      <Button variant="outline" size="sm" onClick={add}>
-        <Plus className="size-4" />
-        Add option
-      </Button>
+
+      <AddButton onClick={add}>Add option</AddButton>
     </div>
   )
 }

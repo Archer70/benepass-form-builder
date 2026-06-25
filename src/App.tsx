@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { LayoutTemplate, Smartphone, Tablet, Monitor, Plus, type LucideIcon } from 'lucide-react'
+import { LayoutTemplate, Smartphone, Tablet, Monitor, type LucideIcon } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 import { createSchema } from '@/lib/types'
 import { BuilderToolbar } from '@/components/builder/BuilderToolbar'
+import { AddButton } from '@/components/builder/AddButton'
 import { FieldList } from '@/components/builder/FieldList'
 import { PropertiesPanel } from '@/components/builder/PropertiesPanel'
 import { FormRenderer } from '@/components/renderer/FormRenderer'
@@ -72,14 +73,7 @@ function App() {
                 <FieldList />
               </CardContent>
               <CardFooter className="border-t pt-4">
-                <Button
-                  variant="outline"
-                  className="w-full border-dashed hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                  onClick={() => addField('text')}
-                >
-                  <Plus className="size-4" />
-                  Add field
-                </Button>
+                <AddButton onClick={() => addField('text')}>Add field</AddButton>
               </CardFooter>
             </Card>
 
