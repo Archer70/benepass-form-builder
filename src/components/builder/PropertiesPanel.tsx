@@ -25,6 +25,7 @@ import {
   type FormField,
 } from '@/lib/types'
 import { FIELD_ICONS } from '@/lib/fieldIcons'
+import { hasDefaultLabel, hasDefaultName } from '@/lib/fieldFactory'
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -79,6 +80,9 @@ export function PropertiesPanel() {
             id={`label-${field.id}`}
             value={field.label}
             onChange={(e) => onUpdate({ label: e.target.value })}
+            // Select-all on first focus so the placeholder default can be typed
+            // over; once it holds a real value, focus places the cursor normally.
+            onFocus={(e) => hasDefaultLabel(field.label) && e.target.select()}
           />
         </FieldRow>
 
@@ -92,6 +96,7 @@ export function PropertiesPanel() {
             className="font-mono text-xs"
             value={field.name}
             onChange={(e) => onUpdate({ name: e.target.value })}
+            onFocus={(e) => hasDefaultName(field.name) && e.target.select()}
             aria-invalid={nameDuplicate}
           />
         </FieldRow>

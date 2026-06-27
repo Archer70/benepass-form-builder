@@ -4,6 +4,8 @@ import {
   reconcileFieldType,
   uniqueName,
   findDuplicateNames,
+  hasDefaultLabel,
+  hasDefaultName,
 } from './fieldFactory'
 
 describe('reconcileFieldType', () => {
@@ -45,5 +47,15 @@ describe('name helpers', () => {
   it('findDuplicateNames returns repeated names only', () => {
     expect(findDuplicateNames([{ name: 'a' }, { name: 'b' }, { name: 'a' }])).toEqual(['a'])
     expect(findDuplicateNames([{ name: 'a' }, { name: 'b' }])).toEqual([])
+  })
+
+  it('hasDefaultLabel/hasDefaultName recognize untouched auto-generated defaults', () => {
+    const field = createDefaultField('text', ['field'])
+    expect(hasDefaultLabel(field.label)).toBe(true)
+    expect(hasDefaultName(field.name)).toBe(true) // "field_2"
+    expect(hasDefaultName('field')).toBe(true)
+    expect(hasDefaultLabel('Email')).toBe(false)
+    expect(hasDefaultName('email')).toBe(false)
+    expect(hasDefaultName('field_extra')).toBe(false)
   })
 })

@@ -1,6 +1,23 @@
 import { nanoid } from 'nanoid'
 import type { FieldOption, FieldType, FormField } from './types'
-import { FIELD_CAPABILITIES, FIELD_TYPE_LABELS } from './types'
+import { FIELD_CAPABILITIES } from './types'
+
+// Type-neutral defaults: a new field almost always gets its type changed right
+// after creation, so seeding the label/name from the initial `text` type ("Text",
+// "text_3") would leave a stale, misleading name once it becomes a radio/date/etc.
+export const DEFAULT_FIELD_LABEL = 'Untitled field'
+const DEFAULT_FIELD_NAME = 'field'
+const DEFAULT_NAME_PATTERN = new RegExp(`^${DEFAULT_FIELD_NAME}(_\\d+)?$`)
+
+/** True while the label is still the untouched auto-generated default. */
+export function hasDefaultLabel(label: string): boolean {
+  return label === DEFAULT_FIELD_LABEL
+}
+
+/** True while the name is still an untouched auto-generated default (field, field_2, …). */
+export function hasDefaultName(name: string): boolean {
+  return DEFAULT_NAME_PATTERN.test(name)
+}
 
 /** Two starter options for option-based fields (select/radio). */
 function defaultOptions(): FieldOption[] {
@@ -45,8 +62,8 @@ export function slugifyName(label: string): string {
  * the names already in use.
  */
 export function createDefaultField(type: FieldType, existingNames: string[] = []): FormField {
-  const baseName = uniqueName(type, existingNames)
-  const label = FIELD_TYPE_LABELS[type]
+  const baseName = uniqueName(DEFAULT_FIELD_NAME, existingNames)
+  const label = DEFAULT_FIELD_LABEL
 
   const field: FormField = {
     id: nanoid(),
