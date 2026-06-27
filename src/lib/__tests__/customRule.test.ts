@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluateCustomRule, validateCustomExpression } from './customRule'
+import { evaluateCustomRule, validateCustomExpression } from '../customRule'
 
 describe('evaluateCustomRule', () => {
   it('compares strings', () => {

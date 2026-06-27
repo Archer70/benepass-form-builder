@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { buildZodSchema } from './buildZodSchema'
-import type { FormField } from './types'
+import { buildZodSchema } from '../buildZodSchema'
+import type { FormField } from '../types'
 
 function field(partial: Partial<FormField> & Pick<FormField, 'type' | 'name'>): FormField {
   return {

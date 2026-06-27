@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { parseFormSchema } from './metaSchema'
-import type { FormField } from './types'
+import { parseFormSchema } from '../metaSchema'
+import type { FormField } from '../types'
 
 function field(partial: Partial<FormField> & Pick<FormField, 'type' | 'name' | 'id'>): FormField {
   return { label: partial.name, ...partial } as FormField

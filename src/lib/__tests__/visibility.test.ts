@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { evaluateCondition, isFieldVisible } from './visibility'
-import type { FormField, VisibilityCondition } from './types'
+import { evaluateCondition, isFieldVisible } from '../visibility'
+import type { FormField, VisibilityCondition } from '../types'
 
 const baseField: FormField = { id: '1', type: 'text', name: 'state', label: 'State' }
 

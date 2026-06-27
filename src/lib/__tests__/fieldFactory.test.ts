@@ -6,7 +6,7 @@ import {
   findDuplicateNames,
   hasDefaultLabel,
   hasDefaultName,
-} from './fieldFactory'
+} from '../fieldFactory'
 
 describe('reconcileFieldType', () => {
   it('adds default options when switching into an option type', () => {
