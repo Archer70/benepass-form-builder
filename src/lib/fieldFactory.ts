@@ -75,16 +75,16 @@ export function createDefaultField(type: FieldType, existingNames: string[] = []
  * coherent: option fields gain default options (if none), non-option fields
  * drop them, and the default value resets to a valid shape for the new type.
  */
-export function reconcileFieldType(field: FormField, type: FieldType): FormField {
-  if (field.type === type) return field
-  const next: FormField = { ...field, type }
+export function reconcileFieldType(field: FormField, nextType: FieldType): FormField {
+  if (field.type === nextType) return field
+  const next: FormField = { ...field, type: nextType }
 
-  if (FIELD_CAPABILITIES[type].hasOptions) {
+  if (FIELD_CAPABILITIES[nextType].hasOptions) {
     next.options = field.options?.length ? field.options : defaultOptions()
   } else {
     delete next.options
   }
 
-  next.defaultValue = type === 'checkbox' ? false : undefined
+  next.defaultValue = nextType === 'checkbox' ? false : undefined
   return next
 }
