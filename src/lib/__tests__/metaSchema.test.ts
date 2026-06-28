@@ -63,4 +63,72 @@ describe('parseFormSchema', () => {
     expect(result.success).toBe(false)
     expect(result.error).toMatch(/unknown field/i)
   })
+
+  it('rejects unknown / misspelled keys (strict)', () => {
+    const json = JSON.stringify({
+      version: 1,
+      title: 'T',
+      fields: [{ id: 'a', type: 'text', name: 'first', label: 'First', requied: true }],
+    })
+    expect(parseFormSchema(json).success).toBe(false)
+  })
+
+  it('rejects an invalid regex pattern', () => {
+    const json = schemaJson([
+      field({ id: 'a', type: 'text', name: 'a', validation: { regex: { pattern: '([' } } }),
+    ])
+    const result = parseFormSchema(json)
+    expect(result.success).toBe(false)
+    expect(result.error).toMatch(/invalid regex/i)
+  })
+
+  it('rejects an unparseable custom rule', () => {
+    const json = schemaJson([
+      field({ id: 'a', type: 'text', name: 'a', validation: { custom: { expression: 'value >=' } } }),
+    ])
+    const result = parseFormSchema(json)
+    expect(result.success).toBe(false)
+    expect(result.error).toMatch(/invalid custom rule/i)
+  })
+
+  it('rejects mismatched visibleWhen operator/value shapes', () => {
+    const inWithScalar = schemaJson([
+      field({ id: 'a', type: 'text', name: 'country' }),
+      field({
+        id: 'b',
+        type: 'text',
+        name: 'state',
+        visibleWhen: { field: 'country', operator: 'in', value: 'US' },
+      }),
+    ])
+    expect(parseFormSchema(inWithScalar).success).toBe(false)
+
+    const equalsWithList = schemaJson([
+      field({ id: 'a', type: 'text', name: 'country' }),
+      field({
+        id: 'b',
+        type: 'text',
+        name: 'state',
+        visibleWhen: { field: 'country', operator: 'equals', value: ['US', 'CA'] },
+      }),
+    ])
+    expect(parseFormSchema(equalsWithList).success).toBe(false)
+  })
+
+  it('accepts valid regex, custom rule, and in-list condition', () => {
+    const json = schemaJson([
+      field({ id: 'a', type: 'text', name: 'country' }),
+      field({
+        id: 'b',
+        type: 'text',
+        name: 'email',
+        validation: {
+          regex: { pattern: '^.+@.+$' },
+          custom: { expression: 'value.length >= 3' },
+        },
+        visibleWhen: { field: 'country', operator: 'in', value: ['US', 'CA'] },
+      }),
+    ])
+    expect(parseFormSchema(json).success).toBe(true)
+  })
 })
