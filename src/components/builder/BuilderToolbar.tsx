@@ -29,17 +29,24 @@ export function BuilderToolbar() {
       toast.error(nameIssue)
       return
     }
-    saveSchema(getSchema())
-    toast.success('Saved to this browser')
+    if (saveSchema(getSchema())) {
+      toast.success('Saved to this browser')
+    } else {
+      toast.error('Could not save — browser storage is unavailable')
+    }
   }
 
   function handleLoad() {
-    const schema = loadSchema()
-    if (!schema) {
+    const result = loadSchema()
+    if (result.status === 'empty') {
       toast.error('No saved form found')
       return
     }
-    hydrate(schema)
+    if (result.status === 'invalid') {
+      toast.error(`Could not load saved form: ${result.error}`)
+      return
+    }
+    hydrate(result.schema)
     toast.success('Loaded saved form')
   }
 

@@ -3,25 +3,59 @@ import { parseFormSchema } from './metaSchema'
 
 const STORAGE_KEY = 'formbuilder.schema.v1'
 
-/** Persist the schema to localStorage (Save button). */
-export function saveSchema(schema: FormSchema): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(schema))
+/** Result of attempting to load a saved schema. */
+export type LoadResult =
+  | { status: 'ok'; schema: FormSchema }
+  | { status: 'empty' }
+  | { status: 'invalid'; error: string }
+
+/**
+ * Persist the schema to localStorage (Save button). Returns false when storage
+ * is unavailable — quota exceeded, Safari private mode, or access denied — so
+ * the caller can surface a failure instead of throwing.
+ */
+export function saveSchema(schema: FormSchema): boolean {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schema))
+    return true
+  } catch {
+    return false
+  }
 }
 
-/** Read + validate a previously saved schema (Load button). */
-export function loadSchema(): FormSchema | null {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return null
+/**
+ * Read + validate a previously saved schema (Load button), distinguishing
+ * "nothing saved" from "saved but no longer valid" (corrupted, or an
+ * incompatible older format) so the two can be reported differently.
+ */
+export function loadSchema(): LoadResult {
+  let raw: string | null
+  try {
+    raw = localStorage.getItem(STORAGE_KEY)
+  } catch {
+    return { status: 'invalid', error: 'Browser storage is unavailable.' }
+  }
+  if (!raw) return { status: 'empty' }
+
   const result = parseFormSchema(raw)
-  return result.success ? (result.data ?? null) : null
+  if (result.success && result.data) return { status: 'ok', schema: result.data }
+  return { status: 'invalid', error: result.error ?? 'Saved form is no longer valid.' }
 }
 
 /** Remove the saved schema (Reset button). */
 export function clearSchema(): void {
-  localStorage.removeItem(STORAGE_KEY)
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Nothing to clear if storage is unavailable.
+  }
 }
 
 /** Whether a saved schema currently exists. */
 export function hasSavedSchema(): boolean {
-  return localStorage.getItem(STORAGE_KEY) !== null
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== null
+  } catch {
+    return false
+  }
 }
