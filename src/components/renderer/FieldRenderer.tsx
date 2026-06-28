@@ -28,7 +28,7 @@ interface Props {
 
 export function FieldRenderer({ field, control, error }: Props) {
   const id = `field-${field.id}`
-  const required = Boolean(field.required || field.validation?.required)
+  const required = Boolean(field.required)
   const isCheckbox = field.type === 'checkbox'
   // A radio group isn't a single labelable control, so it's associated via
   // aria-labelledby (see RadioField) rather than htmlFor.

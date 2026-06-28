@@ -94,7 +94,7 @@ function makePreprocessor(field: FormField) {
 /** Build the zod schema for a single field, handling optional/required. */
 function buildFieldSchema(field: FormField): z.ZodTypeAny {
   const present = buildPresentSchema(field)
-  const required = Boolean(field.required || field.validation?.required)
+  const required = Boolean(field.required)
   const schema = z.preprocess(makePreprocessor(field), present.optional())
 
   if (!required) return schema

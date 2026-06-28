@@ -94,7 +94,6 @@ dnd-kit · zustand.
       "label": "Email address",
       "required": true,
       "validation": {
-        "required": true,
         "regex": { "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "message": "Enter a valid email" }
       }
     },

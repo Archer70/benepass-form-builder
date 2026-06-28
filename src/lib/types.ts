@@ -23,8 +23,6 @@ export interface FieldOption {
 }
 
 export interface ValidationRules {
-  /** Field must have a value. Also surfaced as `FormField.required` for convenience. */
-  required?: boolean
   /** Minimum string length / array length, or minimum numeric value. */
   min?: number
   /** Maximum string length / array length, or maximum numeric value. */
@@ -57,6 +55,7 @@ export interface FormField {
   label: string
   placeholder?: string
   helpText?: string
+  /** Field must have a value. The single source of truth for required-ness. */
   required?: boolean
   defaultValue?: unknown
   /** Choices for `select` / `radio`. */

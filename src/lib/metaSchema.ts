@@ -23,7 +23,6 @@ const fieldOptionSchema = z
 
 const validationRulesSchema = z
   .object({
-    required: z.boolean().optional(),
     min: z.number().optional(),
     max: z.number().optional(),
     regex: z

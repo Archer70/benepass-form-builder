@@ -73,7 +73,6 @@ export function createDefaultField(type: FieldType, existingNames: string[] = []
     placeholder: '',
     helpText: '',
     required: false,
-    validation: { required: false },
   }
 
   if (FIELD_CAPABILITIES[type].hasOptions) {

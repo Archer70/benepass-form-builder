@@ -25,7 +25,7 @@ export function SortableFieldItem({ field, selected, onSelect, onRemove }: Props
   }
 
   const TypeIcon = FIELD_ICONS[field.type]
-  const required = field.required || field.validation?.required
+  const required = field.required
 
   return (
     <div

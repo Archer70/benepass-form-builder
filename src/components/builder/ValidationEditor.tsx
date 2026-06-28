@@ -42,10 +42,8 @@ export function ValidationEditor({ field, onUpdate }: Props) {
         <Label htmlFor={`required-${field.id}`}>Required</Label>
         <Switch
           id={`required-${field.id}`}
-          checked={Boolean(field.required || v.required)}
-          onCheckedChange={(checked) =>
-            onUpdate({ required: checked, validation: { ...v, required: checked } })
-          }
+          checked={Boolean(field.required)}
+          onCheckedChange={(checked) => onUpdate({ required: checked })}
         />
       </div>
 
