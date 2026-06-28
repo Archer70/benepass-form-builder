@@ -1,7 +1,16 @@
 import { Input } from '@/components/ui/input'
 import type { FieldControlProps } from './types'
 
-export function NumberField({ field, id, value, onChange, onBlur, invalid }: FieldControlProps) {
+export function NumberField({
+  field,
+  id,
+  value,
+  onChange,
+  onBlur,
+  invalid,
+  required,
+  describedBy,
+}: FieldControlProps) {
   return (
     <Input
       id={id}
@@ -9,6 +18,8 @@ export function NumberField({ field, id, value, onChange, onBlur, invalid }: Fie
       inputMode="decimal"
       placeholder={field.placeholder}
       aria-invalid={invalid}
+      aria-required={required}
+      aria-describedby={describedBy}
       // Keep the raw string in form state; the zod schema coerces on validation.
       value={value === undefined || value === null ? '' : String(value)}
       onChange={(e) => onChange(e.target.value)}

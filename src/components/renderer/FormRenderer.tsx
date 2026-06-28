@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Loader2, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FieldRenderer } from './FieldRenderer'
 import { SubmitStatus } from './SubmitStatus'
 import type { FormSchema } from '@/lib/types'
-import { buildZodSchema } from '@/lib/buildZodSchema'
+import { createFormResolver } from '@/lib/formResolver'
 import { visibleFields } from '@/lib/visibility'
 import { mockSubmit, type SubmitResult } from '@/lib/mockSubmit'
 
@@ -32,25 +32,9 @@ export function FormRenderer({ schema }: { schema: FormSchema }) {
   const [result, setResult] = useState<SubmitResult | null>(null)
 
   // A visibility-aware resolver: validation re-derives the active schema from
-  // the *current* values, so hidden fields never block submission.
-  const resolver = useMemo<Resolver<Values>>(
-    () => (values) => {
-      const zodSchema = buildZodSchema(schema.fields, values)
-      const parsed = zodSchema.safeParse(values)
-      if (parsed.success) {
-        return { values: { ...values, ...parsed.data }, errors: {} }
-      }
-      const errors: Record<string, { type: string; message: string }> = {}
-      for (const issue of parsed.error.issues) {
-        const key = String(issue.path[0] ?? '')
-        if (key && !errors[key]) {
-          errors[key] = { type: String(issue.code ?? 'validation'), message: issue.message }
-        }
-      }
-      return { values: {}, errors: errors as never }
-    },
-    [schema.fields],
-  )
+  // the *current* values, so hidden fields never block submission. (See
+  // lib/formResolver for the build/parse/error-mapping details.)
+  const resolver = useMemo(() => createFormResolver(schema.fields), [schema.fields])
 
   const {
     control,

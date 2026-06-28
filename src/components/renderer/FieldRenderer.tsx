@@ -35,12 +35,22 @@ export function FieldRenderer({ field, control, error }: Props) {
   const isRadio = field.type === 'radio'
   const Control = CONTROLS[field.type]
 
+  const helpId = field.helpText ? `${id}-help` : undefined
+  const errorId = error ? `${id}-error` : undefined
+  // Associate help + error text with the control so screen readers announce
+  // them (otherwise aria-invalid says "invalid" with no reason).
+  const describedBy = [helpId, errorId].filter(Boolean).join(' ') || undefined
+
   return (
     <div className="space-y-1.5">
       {!isCheckbox && (
         <Label id={`${id}-label`} htmlFor={isRadio ? undefined : id}>
           {field.label}
-          {required && <span className="ml-0.5 text-destructive">*</span>}
+          {required && (
+            <span className="ml-0.5 text-destructive" aria-hidden>
+              *
+            </span>
+          )}
         </Label>
       )}
 
@@ -55,13 +65,23 @@ export function FieldRenderer({ field, control, error }: Props) {
             onChange: ctrl.onChange,
             onBlur: ctrl.onBlur,
             invalid: Boolean(error),
+            required,
+            describedBy,
           }
           return <Control {...controlProps} />
         }}
       />
 
-      {field.helpText && <p className="text-xs text-muted-foreground">{field.helpText}</p>}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {field.helpText && (
+        <p id={helpId} className="text-xs text-muted-foreground">
+          {field.helpText}
+        </p>
+      )}
+      {error && (
+        <p id={errorId} role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   )
 }
