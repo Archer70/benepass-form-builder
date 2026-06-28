@@ -1,5 +1,7 @@
 # Form Builder
 
+**▶ Live demo: https://benepass-form-builder-mocha.vercel.app/** — nothing to install.
+
 A small React app for **visually designing forms**, **exporting/importing** them as JSON, and
 **rendering** a working form with validation, conditional visibility, and a mock submission flow.
 
@@ -123,9 +125,21 @@ dnd-kit · zustand.
 
 ## Tests
 
-`vitest` covers the pure logic — the highest-value, framework-independent code:
+`vitest` covers the pure logic — the highest-value, framework-independent code (no component/render
+tests; UI behavior is delegated to react-hook-form / Radix / dnd-kit):
 
 - `buildZodSchema.test.ts` — required/optional, min/max, regex, custom, number coercion,
   checkbox-required, and hidden-field exclusion.
 - `visibility.test.ts` — every condition operator.
 - `customRule.test.ts` — the DSL grammar and error handling.
+- `formResolver.test.ts` — the RHF resolver: validation, error mapping, hidden-field exclusion.
+- `metaSchema.test.ts` — import validation: strict keys, invalid regex/custom rules, operator/value
+  shape, duplicate names/ids, dangling visibility refs.
+- `fieldFactory.test.ts` / `useBuilderStore.test.ts` — defaults, type reconciliation, and the
+  store's rename/delete cascades into `visibleWhen`.
+- `storage.test.ts` — localStorage round-trip and the empty / invalid / unavailable cases.
+
+## Deployment
+
+Deployed as a static SPA on **Vercel** (auto-detects Vite — build `npm run build`, output `dist`).
+Pushes to `main` redeploy automatically; no server or config is required.
