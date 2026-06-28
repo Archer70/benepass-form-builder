@@ -46,7 +46,17 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
 
   removeField: (id) =>
     set((state) => {
-      const fields = state.fields.filter((f) => f.id !== id)
+      const removedName = state.fields.find((f) => f.id === id)?.name
+      // Drop the field, and clear any dangling visibleWhen references to it so
+      // dependents don't evaluate against a missing field (and so the schema
+      // stays re-importable). Mirrors the rename cascade in updateField.
+      const fields = state.fields
+        .filter((f) => f.id !== id)
+        .map((f) =>
+          removedName && f.visibleWhen?.field === removedName
+            ? { ...f, visibleWhen: undefined }
+            : f,
+        )
       const selectedId =
         state.selectedId === id ? (fields[0]?.id ?? null) : state.selectedId
       return { fields, selectedId }
