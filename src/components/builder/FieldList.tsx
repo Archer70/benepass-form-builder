@@ -15,7 +15,9 @@ import {
 import { Inbox } from 'lucide-react'
 import { SortableFieldItem } from './SortableFieldItem'
 import { EmptyState } from './EmptyState'
+import { Button } from '@/components/ui/button'
 import { useBuilderStore } from '@/store/useBuilderStore'
+import { sampleSchema } from '@/lib/sampleSchema'
 
 export function FieldList() {
   const fields = useBuilderStore((s) => s.fields)
@@ -23,6 +25,7 @@ export function FieldList() {
   const selectField = useBuilderStore((s) => s.selectField)
   const removeField = useBuilderStore((s) => s.removeField)
   const moveField = useBuilderStore((s) => s.moveField)
+  const hydrate = useBuilderStore((s) => s.hydrate)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -41,8 +44,12 @@ export function FieldList() {
       <EmptyState
         icon={Inbox}
         title="No fields yet."
-        description="Use the “Add field” button below to get started."
-      />
+        description="Add a field below, or load a sample form to explore."
+      >
+        <Button variant="outline" size="sm" onClick={() => hydrate(sampleSchema())}>
+          Load sample form
+        </Button>
+      </EmptyState>
     )
   }
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parseFormSchema } from '../metaSchema'
+import { sampleSchema } from '../sampleSchema'
 import type { FormField } from '../types'
 
 function field(partial: Partial<FormField> & Pick<FormField, 'type' | 'name' | 'id'>): FormField {
@@ -11,6 +12,10 @@ function schemaJson(fields: FormField[]): string {
 }
 
 describe('parseFormSchema', () => {
+  it('accepts the bundled sample schema', () => {
+    expect(parseFormSchema(JSON.stringify(sampleSchema())).success).toBe(true)
+  })
+
   it('accepts a well-formed schema', () => {
     const json = schemaJson([
       field({ id: 'a', type: 'text', name: 'first' }),
