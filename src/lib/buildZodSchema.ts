@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { FormField } from './types'
 import { isFieldVisible } from './visibility'
-import { evaluateCustomRule } from './customRule'
+import { CUSTOM_VALIDATORS } from './customValidators'
 
 /** A value is "empty" if the user has not meaningfully filled it in. */
 function isEmpty(v: unknown): boolean {
@@ -17,21 +17,18 @@ export function compileRegex(pattern: string): RegExp | null {
   }
 }
 
-/** Attach a custom-rule refinement, skipping evaluation for empty values. */
+/** Attach the chosen curated validator as a refinement, skipping empty values. */
 function withCustomRule(schema: z.ZodTypeAny, field: FormField): z.ZodTypeAny {
   const custom = field.validation?.custom
-  if (!custom?.expression?.trim()) return schema
+  const validator = custom && CUSTOM_VALIDATORS[custom.kind]
+  if (!validator) return schema
   return schema.refine(
     (v: unknown) => {
       if (isEmpty(v)) return true
-      try {
-        return evaluateCustomRule(custom.expression, v)
-      } catch {
-        // A malformed expression should never block the user.
-        return true
-      }
+      // Curated validators are string checks; non-strings simply pass.
+      return typeof v === 'string' ? validator.test(v) : true
     },
-    { message: custom.message || 'Invalid value' },
+    { message: custom.message || validator.message },
   )
 }
 

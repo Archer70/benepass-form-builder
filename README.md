@@ -31,8 +31,9 @@ npm run preview    # serve the production build
 - **Design visually** — add any of 7 field types (`text`, `textarea`, `number`, `select`,
   `radio`, `checkbox`, `date`), reorder by **drag & drop** (dnd-kit), and edit every property:
   `label`, `name`, `placeholder`, `helpText`, `type`, `required`, `defaultValue`, options.
-- **Validation** — per field: `required`, `min`/`max` (length or value), `regex`, and a safe
-  `custom` rule DSL. Compiled to a [zod](https://zod.dev) schema at render time.
+- **Validation** — per field: `required`, `min`/`max` (length or value), `regex`, and a curated set
+  of named `custom` validators (email, URL, alphanumeric, …). Compiled to a
+  [zod](https://zod.dev) schema at render time.
 - **Conditional visibility** — show a field only when another satisfies a condition
   (e.g. *State* appears only when *Country* `equals` `US`). Hidden fields are excluded from
   validation so they never block submission.
@@ -51,7 +52,7 @@ src/
     types.ts          # FormSchema / FormField data model (source of truth)
     buildZodSchema.ts  # FormField[] + values -> zod schema (visibility-aware)
     visibility.ts      # conditional-visibility evaluator
-    customRule.ts      # safe predicate DSL for `custom` rules (no eval)
+    customValidators.ts # curated named `custom` validators (email, url, ...)
     metaSchema.ts      # zod schema-of-the-schema; validates imported JSON
     storage.ts         # localStorage save/load/reset
     mockSubmit.ts      # latency + random success/failure
@@ -75,10 +76,10 @@ dnd-kit · zustand.
 - **Validation is data, not code.** `buildZodSchema(fields, values)` rebuilds the zod schema from
   the current values on every validation, so conditional visibility and validation stay consistent
   by construction — hidden fields are simply omitted from the schema.
-- **Safe custom rules.** `custom` expressions are evaluated by a tiny recursive-descent parser
-  (`customRule.ts`), never `eval`/`new Function`. Supported grammar: `value`, `value.length`,
-  comparisons, `&&`/`||`/`!`, parentheses, string/number/bool literals.
-  Example: `value.length >= 3 && value !== "admin"`.
+- **Curated custom validators.** Rather than a free-text expression language, `custom` is a small
+  fixed set of named validators (`customValidators.ts`) — email, URL, alphanumeric, no-whitespace,
+  lowercase — each a one-line predicate compiled to a zod `.refine()`. Simpler, safer (no parser /
+  no `eval`), and clearer to use; the author can override the default error message.
 - **Manual persistence.** Save/Load/Reset are explicit buttons (per the brief) rather than
   auto-persistence.
 
@@ -131,10 +132,9 @@ tests; UI behavior is delegated to react-hook-form / Radix / dnd-kit):
 - `buildZodSchema.test.ts` — required/optional, min/max, regex, custom, number coercion,
   checkbox-required, and hidden-field exclusion.
 - `visibility.test.ts` — every condition operator.
-- `customRule.test.ts` — the DSL grammar and error handling.
 - `formResolver.test.ts` — the RHF resolver: validation, error mapping, hidden-field exclusion.
-- `metaSchema.test.ts` — import validation: strict keys, invalid regex/custom rules, operator/value
-  shape, duplicate names/ids, dangling visibility refs.
+- `metaSchema.test.ts` — import validation: strict keys, invalid regex, unknown custom validator,
+  operator/value shape, duplicate names/ids, dangling visibility refs.
 - `fieldFactory.test.ts` / `useBuilderStore.test.ts` — defaults, type reconciliation, and the
   store's rename/delete cascades into `visibleWhen`.
 - `storage.test.ts` — localStorage round-trip and the empty / invalid / unavailable cases.

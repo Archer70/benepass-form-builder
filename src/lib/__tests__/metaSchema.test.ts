@@ -82,13 +82,21 @@ describe('parseFormSchema', () => {
     expect(result.error).toMatch(/invalid regex/i)
   })
 
-  it('rejects an unparseable custom rule', () => {
-    const json = schemaJson([
-      field({ id: 'a', type: 'text', name: 'a', validation: { custom: { expression: 'value >=' } } }),
-    ])
-    const result = parseFormSchema(json)
-    expect(result.success).toBe(false)
-    expect(result.error).toMatch(/invalid custom rule/i)
+  it('rejects an unknown custom validator kind', () => {
+    const json = JSON.stringify({
+      version: 1,
+      title: 'T',
+      fields: [
+        {
+          id: 'a',
+          type: 'text',
+          name: 'a',
+          label: 'A',
+          validation: { custom: { kind: 'not_a_validator' } },
+        },
+      ],
+    })
+    expect(parseFormSchema(json).success).toBe(false)
   })
 
   it('rejects mismatched visibleWhen operator/value shapes', () => {
@@ -124,7 +132,7 @@ describe('parseFormSchema', () => {
         name: 'email',
         validation: {
           regex: { pattern: '^.+@.+$' },
-          custom: { expression: 'value.length >= 3' },
+          custom: { kind: 'email' },
         },
         visibleWhen: { field: 'country', operator: 'in', value: ['US', 'CA'] },
       }),

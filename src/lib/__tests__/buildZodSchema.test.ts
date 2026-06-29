@@ -60,12 +60,12 @@ describe('buildZodSchema', () => {
     ).toBe(true)
   })
 
-  it('applies custom rules', () => {
+  it('applies a curated custom validator', () => {
     const fields = [
-      field({ type: 'text', name: 'u', validation: { custom: { expression: 'value !== "admin"' } } }),
+      field({ type: 'text', name: 'u', validation: { custom: { kind: 'alphanumeric' } } }),
     ]
-    expect(buildZodSchema(fields, { u: 'admin' }).safeParse({ u: 'admin' }).success).toBe(false)
-    expect(buildZodSchema(fields, { u: 'jane' }).safeParse({ u: 'jane' }).success).toBe(true)
+    expect(buildZodSchema(fields, { u: 'jane doe' }).safeParse({ u: 'jane doe' }).success).toBe(false)
+    expect(buildZodSchema(fields, { u: 'jane99' }).safeParse({ u: 'jane99' }).success).toBe(true)
   })
 
   it('excludes hidden fields from validation', () => {

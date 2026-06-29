@@ -3,7 +3,7 @@ import type { FormSchema } from './types'
 import { FIELD_TYPES, OPTION_FIELD_TYPES, SCHEMA_VERSION } from './types'
 import { findDuplicateNames } from './fieldFactory'
 import { compileRegex } from './buildZodSchema'
-import { validateCustomExpression } from './customRule'
+import { CUSTOM_VALIDATOR_KINDS } from './customValidators'
 
 /**
  * A zod "schema of the schema": validates that imported JSON is a well-formed
@@ -34,7 +34,7 @@ const validationRulesSchema = z
       .optional(),
     custom: z
       .object({
-        expression: z.string(),
+        kind: z.enum(CUSTOM_VALIDATOR_KINDS),
         message: z.string().optional(),
       })
       .strict()
@@ -109,17 +109,6 @@ export const formSchemaMeta = z
           code: 'custom',
           message: `Field "${field.name}" has an invalid regex pattern`,
           path: ['fields', i, 'validation', 'regex', 'pattern'],
-        })
-      }
-
-      // An unparseable custom rule would also be silently skipped at runtime.
-      const expression = field.validation?.custom?.expression
-      const customError = expression ? validateCustomExpression(expression) : null
-      if (customError) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `Field "${field.name}" has an invalid custom rule: ${customError}`,
-          path: ['fields', i, 'validation', 'custom', 'expression'],
         })
       }
 

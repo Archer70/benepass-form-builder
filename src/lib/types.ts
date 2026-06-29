@@ -5,6 +5,8 @@
  * renderer consumes it, and export/import simply (de)serialize it to JSON.
  */
 
+import type { CustomValidatorKind } from './customValidators'
+
 export const FIELD_TYPES = [
   'text',
   'textarea',
@@ -30,10 +32,10 @@ export interface ValidationRules {
   /** Regular expression the value must match (string fields only). */
   regex?: { pattern: string; message?: string }
   /**
-   * Custom rule evaluated by a small, safe predicate DSL (no `eval`).
-   * See `lib/customRule.ts` for the supported grammar.
+   * A curated named validator (e.g. email, url). See `lib/customValidators.ts`.
+   * `message` optionally overrides the validator's default error text.
    */
-  custom?: { expression: string; message?: string }
+  custom?: { kind: CustomValidatorKind; message?: string }
 }
 
 export type VisibilityOperator = 'equals' | 'notEquals' | 'in' | 'truthy'
