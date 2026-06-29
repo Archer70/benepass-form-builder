@@ -51,6 +51,7 @@ src/
   lib/
     types.ts          # FormSchema / FormField data model (source of truth)
     buildZodSchema.ts  # FormField[] + values -> zod schema (visibility-aware)
+    formResolver.ts    # react-hook-form resolver built on buildZodSchema
     visibility.ts      # conditional-visibility evaluator
     customValidators.ts # curated named `custom` validators (email, url, ...)
     metaSchema.ts      # zod schema-of-the-schema; validates imported JSON
@@ -97,7 +98,7 @@ dnd-kit · zustand.
       "label": "Email address",
       "required": true,
       "validation": {
-        "regex": { "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", "message": "Enter a valid email" }
+        "custom": { "kind": "email" }
       }
     },
     {
@@ -123,6 +124,10 @@ dnd-kit · zustand.
 ```
 
 `operator` is one of `equals` · `notEquals` · `in` · `truthy`.
+
+`validation` accepts `required`, `min`, `max`, `regex: { pattern, message? }`, and
+`custom: { kind, message? }` — where `kind` is one of `email` · `url` · `alphanumeric` ·
+`no_whitespace` · `lowercase`.
 
 ## Tests
 
