@@ -18,8 +18,8 @@ type ViewportId = 'mobile' | 'tablet' | 'desktop'
 
 const VIEWPORTS: { id: ViewportId; label: string; icon: LucideIcon; width: string }[] = [
   { id: 'mobile', label: 'Mobile', icon: Smartphone, width: 'max-w-sm' },
-  { id: 'tablet', label: 'Tablet', icon: Tablet, width: 'max-w-lg' },
-  { id: 'desktop', label: 'Desktop', icon: Monitor, width: 'max-w-2xl' },
+  { id: 'tablet', label: 'Tablet', icon: Tablet, width: 'max-w-3xl' },
+  { id: 'desktop', label: 'Desktop', icon: Monitor, width: 'max-w-[80vw]' },
 ]
 
 function App() {
@@ -106,7 +106,7 @@ function App() {
 
         {/* Preview */}
         <TabsContent value="preview" className="m-0 min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-2xl p-6">
+          <div className="w-full p-6">
             <div className="mb-4 flex justify-center">
               <div className="inline-flex items-center gap-1 rounded-lg border bg-background p-1">
                 {VIEWPORTS.map((v) => {
