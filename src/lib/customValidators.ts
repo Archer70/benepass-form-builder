@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 /**
  * Curated "custom" validators — a small, fixed set of named checks the form
  * author can pick from (each compiles to a zod `.refine()` in buildZodSchema).
@@ -6,6 +8,11 @@
  * for "custom rules (using zod/yup)", and a curated list is simpler, safer, and
  * clearer to use than a mini-language — no parser, no eval, no syntax to learn.
  * All validators operate on string values (offered on text/textarea fields).
+ *
+ * email/url delegate to zod's own validators rather than a hand-rolled regex:
+ * email-by-regex is a known footgun (full RFC compliance is futile; the only
+ * authoritative check is a confirmation email), so we defer to the maintained,
+ * battle-tested implementation — consistent with "validation using zod".
  */
 
 export const CUSTOM_VALIDATOR_KINDS = [
@@ -30,19 +37,12 @@ interface CustomValidator {
 export const CUSTOM_VALIDATORS: Record<CustomValidatorKind, CustomValidator> = {
   email: {
     label: 'Email address',
-    test: (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v),
+    test: (v) => z.email().safeParse(v).success,
     message: 'Enter a valid email address',
   },
   url: {
     label: 'URL',
-    test: (v) => {
-      try {
-        new URL(v)
-        return true
-      } catch {
-        return false
-      }
-    },
+    test: (v) => z.url().safeParse(v).success,
     message: 'Enter a valid URL',
   },
   alphanumeric: {
