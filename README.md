@@ -148,3 +148,47 @@ tests; UI behavior is delegated to react-hook-form / Radix / dnd-kit):
 
 Deployed as a static SPA on **Vercel** (auto-detects Vite — build `npm run build`, output `dist`).
 Pushes to `main` redeploy automatically; no server or config is required.
+
+## Limitations & production considerations
+
+Scoped to the brief's spirit — correctness, clarity, and tradeoffs over completeness. The notable
+boundaries, and what I'd do with more time or to make this production-bound:
+
+**Deliberate tradeoffs**
+
+- **Logic-only tests.** Unit tests cover the pure logic — schema building, validation, visibility,
+  the RHF resolver, import validation, and the store's rename/delete cascades — where the real risk
+  lives; UI behavior leans on the already-tested libraries (react-hook-form, Radix, dnd-kit). The
+  next tier would be a few Playwright end-to-end flows (build → preview → submit; import-invalid-JSON
+  → error), not shallow component tests.
+- **Two schema representations.** TS interfaces in `types.ts` (authoring ergonomics + JSDoc) and a
+  zod meta-schema in `metaSchema.ts` (runtime import validation, including cross-field rules), kept
+  in sync by hand. At scale I'd derive the leaf types via `z.infer` and keep only the cross-field
+  `superRefine` separate.
+- **Curated custom validators** rather than a free-text expression language: the spec only asks for
+  "custom rules (using zod)", and a named list is simpler, safer (no parser / no `eval`), and clearer
+  to use.
+- **Explicit per-field-type components.** The seven field components share some boilerplate; explicit
+  beats a premature abstraction at this size. A shared `<FieldControl>` + field registry earns its
+  keep once the type list grows.
+
+**Known limitations (next up)**
+
+- **No schema migration path.** `version` is validated with `z.literal(1)`, so bumping it would
+  hard-reject older saved/exported forms. Production needs `version` branching + a
+  `migrate(old): FormSchema` step ahead of validation.
+- **`min`/`max` covers text length and number value, not dates.** Date range (earliest/latest) is a
+  natural follow-up.
+- **`select`/`radio` values aren't constrained to their options at validation time** (the builder UI
+  prevents bad input; imports are structurally validated). Would tighten to a `z.enum` built from the
+  field's options.
+- **Accessibility gaps.** Drag-to-reorder has no keyboard alternative (would add move up/down
+  buttons), and a few brand-tuned colors fall just short of WCAG AA contrast.
+
+**If this were production-bound ("ship it")**
+
+- Replace `localStorage` + `mockSubmit` with a real API — the `FormSchema` JSON is already the
+  contract, so this is mostly swapping the persistence/submission adapters.
+- Add schema versioning + migrations, saved-forms management, and auth / multi-user.
+- Broaden testing to Playwright e2e + targeted component tests; add error reporting / telemetry.
+- Complete the accessibility pass to WCAG AA, and add i18n for labels and messages.
