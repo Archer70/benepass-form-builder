@@ -1,20 +1,12 @@
 import { z } from 'zod'
 import type { FormField } from './types'
 import { isFieldVisible } from './visibility'
+import { compileRegex } from './regex'
 import { CUSTOM_VALIDATORS } from './customValidators'
 
 /** A value is "empty" if the user has not meaningfully filled it in. */
 function isEmpty(v: unknown): boolean {
   return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)
-}
-
-/** Compile a user-supplied regex pattern, returning null if it's invalid. */
-export function compileRegex(pattern: string): RegExp | null {
-  try {
-    return new RegExp(pattern)
-  } catch {
-    return null
-  }
 }
 
 /** Attach the chosen curated validator as a refinement, skipping empty values. */

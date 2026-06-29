@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { FormSchema } from './types'
 import { FIELD_TYPES, OPTION_FIELD_TYPES, SCHEMA_VERSION } from './types'
 import { findDuplicateNames } from './fieldFactory'
-import { compileRegex } from './buildZodSchema'
+import { compileRegex } from './regex'
 import { CUSTOM_VALIDATOR_KINDS } from './customValidators'
 
 /**
@@ -66,6 +66,95 @@ const formFieldSchema = z
   })
   .strict()
 
+type MetaField = z.infer<typeof formFieldSchema>
+
+/** Field names must be unique so form values don't collide. */
+function checkDuplicateNames(fields: MetaField[], ctx: z.RefinementCtx) {
+  const duplicates = findDuplicateNames(fields)
+  if (duplicates.length > 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `Duplicate field name(s): ${duplicates.join(', ')}`,
+      path: ['fields'],
+    })
+  }
+}
+
+/** Ids must be unique so selection and drag-and-drop stay unambiguous. */
+function checkDuplicateIds(fields: MetaField[], ctx: z.RefinementCtx) {
+  const ids = fields.map((f) => f.id)
+  const duplicates = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]
+  if (duplicates.length > 0) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `Duplicate field id(s): ${duplicates.join(', ')}`,
+      path: ['fields'],
+    })
+  }
+}
+
+/** select/radio fields are meaningless without at least one option. */
+function checkOptionFields(fields: MetaField[], ctx: z.RefinementCtx) {
+  fields.forEach((field, i) => {
+    if (OPTION_FIELD_TYPES.includes(field.type) && !field.options?.length) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Field "${field.name}" (${field.type}) needs at least one option`,
+        path: ['fields', i, 'options'],
+      })
+    }
+  })
+}
+
+/** A regex that won't compile would silently disable validation at runtime. */
+function checkRegexPatterns(fields: MetaField[], ctx: z.RefinementCtx) {
+  fields.forEach((field, i) => {
+    const pattern = field.validation?.regex?.pattern
+    if (pattern && !compileRegex(pattern)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Field "${field.name}" has an invalid regex pattern`,
+        path: ['fields', i, 'validation', 'regex', 'pattern'],
+      })
+    }
+  })
+}
+
+/** visibleWhen must target a known field, with a value shape matching its operator. */
+function checkVisibilityConditions(fields: MetaField[], ctx: z.RefinementCtx) {
+  const knownNames = new Set(fields.map((f) => f.name))
+  fields.forEach((field, i) => {
+    const condition = field.visibleWhen
+    if (!condition) return
+
+    if (!knownNames.has(condition.field)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Field "${field.name}" has a visibility condition referencing unknown field "${condition.field}"`,
+        path: ['fields', i, 'visibleWhen', 'field'],
+      })
+    }
+    // Correlate value shape with operator: `in` takes a list, equality a scalar.
+    if (condition.operator === 'in' && !Array.isArray(condition.value)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Field "${field.name}": the "is one of" condition needs a list of values`,
+        path: ['fields', i, 'visibleWhen', 'value'],
+      })
+    }
+    if (
+      (condition.operator === 'equals' || condition.operator === 'notEquals') &&
+      Array.isArray(condition.value)
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Field "${field.name}": the "${condition.operator}" condition needs a single value, not a list`,
+        path: ['fields', i, 'visibleWhen', 'value'],
+      })
+    }
+  })
+}
+
 export const formSchemaMeta = z
   .object({
     version: z.literal(SCHEMA_VERSION),
@@ -73,74 +162,11 @@ export const formSchemaMeta = z
     fields: z.array(formFieldSchema),
   })
   .superRefine((schema, ctx) => {
-    const duplicateNames = findDuplicateNames(schema.fields)
-    if (duplicateNames.length > 0) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `Duplicate field name(s): ${duplicateNames.join(', ')}`,
-        path: ['fields'],
-      })
-    }
-
-    const ids = schema.fields.map((f) => f.id)
-    const duplicateIds = [...new Set(ids.filter((id, i) => ids.indexOf(id) !== i))]
-    if (duplicateIds.length > 0) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `Duplicate field id(s): ${duplicateIds.join(', ')}`,
-        path: ['fields'],
-      })
-    }
-
-    const knownNames = new Set(schema.fields.map((f) => f.name))
-    schema.fields.forEach((field, i) => {
-      if (OPTION_FIELD_TYPES.includes(field.type) && !field.options?.length) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `Field "${field.name}" (${field.type}) needs at least one option`,
-          path: ['fields', i, 'options'],
-        })
-      }
-
-      // A regex that won't compile would silently disable validation at runtime.
-      const pattern = field.validation?.regex?.pattern
-      if (pattern && !compileRegex(pattern)) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `Field "${field.name}" has an invalid regex pattern`,
-          path: ['fields', i, 'validation', 'regex', 'pattern'],
-        })
-      }
-
-      const condition = field.visibleWhen
-      if (condition) {
-        if (!knownNames.has(condition.field)) {
-          ctx.addIssue({
-            code: 'custom',
-            message: `Field "${field.name}" has a visibility condition referencing unknown field "${condition.field}"`,
-            path: ['fields', i, 'visibleWhen', 'field'],
-          })
-        }
-        // Correlate value shape with operator: `in` takes a list, equality a scalar.
-        if (condition.operator === 'in' && !Array.isArray(condition.value)) {
-          ctx.addIssue({
-            code: 'custom',
-            message: `Field "${field.name}": the "is one of" condition needs a list of values`,
-            path: ['fields', i, 'visibleWhen', 'value'],
-          })
-        }
-        if (
-          (condition.operator === 'equals' || condition.operator === 'notEquals') &&
-          Array.isArray(condition.value)
-        ) {
-          ctx.addIssue({
-            code: 'custom',
-            message: `Field "${field.name}": the "${condition.operator}" condition needs a single value, not a list`,
-            path: ['fields', i, 'visibleWhen', 'value'],
-          })
-        }
-      }
-    })
+    checkDuplicateNames(schema.fields, ctx)
+    checkDuplicateIds(schema.fields, ctx)
+    checkOptionFields(schema.fields, ctx)
+    checkRegexPatterns(schema.fields, ctx)
+    checkVisibilityConditions(schema.fields, ctx)
   })
 
 export interface ParseResult {

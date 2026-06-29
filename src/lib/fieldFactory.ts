@@ -47,6 +47,29 @@ export function findDuplicateNames(fields: { name: string }[]): string[] {
   return [...duplicates]
 }
 
+/**
+ * Re-point any `visibleWhen` conditions that reference the field named `from`
+ * to its new name `to`, so a rename doesn't orphan its dependents.
+ */
+export function cascadeFieldRename(fields: FormField[], from: string, to: string): FormField[] {
+  return fields.map((f) =>
+    f.visibleWhen?.field === from
+      ? { ...f, visibleWhen: { ...f.visibleWhen, field: to } }
+      : f,
+  )
+}
+
+/**
+ * Clear any `visibleWhen` conditions that reference the removed field `name`,
+ * so dependents don't evaluate against a missing field (and the schema stays
+ * re-importable).
+ */
+export function clearVisibilityReferences(fields: FormField[], name: string): FormField[] {
+  return fields.map((f) =>
+    f.visibleWhen?.field === name ? { ...f, visibleWhen: undefined } : f,
+  )
+}
+
 /** Convert a label into a safe field name (snake_case, alphanumeric). */
 export function slugifyName(label: string): string {
   const slug = label

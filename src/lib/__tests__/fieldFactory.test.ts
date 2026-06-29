@@ -6,7 +6,21 @@ import {
   findDuplicateNames,
   hasDefaultLabel,
   hasDefaultName,
+  cascadeFieldRename,
+  clearVisibilityReferences,
 } from '../fieldFactory'
+import type { FormField } from '../types'
+
+/** Minimal field with a visibleWhen condition for cascade tests. */
+function fieldWatching(name: string, watches: string): FormField {
+  return {
+    id: name,
+    type: 'text',
+    name,
+    label: name,
+    visibleWhen: { field: watches, operator: 'equals', value: 'x' },
+  }
+}
 
 describe('reconcileFieldType', () => {
   it('adds default options when switching into an option type', () => {
@@ -57,5 +71,26 @@ describe('name helpers', () => {
     expect(hasDefaultLabel('Email')).toBe(false)
     expect(hasDefaultName('email')).toBe(false)
     expect(hasDefaultName('field_extra')).toBe(false)
+  })
+})
+
+describe('visibility cascades', () => {
+  it('cascadeFieldRename re-points dependents to the new name', () => {
+    const fields = [fieldWatching('state', 'country'), fieldWatching('other', 'unrelated')]
+    const result = cascadeFieldRename(fields, 'country', 'nation')
+    expect(result[0].visibleWhen?.field).toBe('nation')
+    expect(result[1].visibleWhen?.field).toBe('unrelated')
+  })
+
+  it('cascadeFieldRename leaves operator/value intact', () => {
+    const [field] = cascadeFieldRename([fieldWatching('state', 'country')], 'country', 'nation')
+    expect(field.visibleWhen).toEqual({ field: 'nation', operator: 'equals', value: 'x' })
+  })
+
+  it('clearVisibilityReferences drops conditions pointing at the removed field', () => {
+    const fields = [fieldWatching('state', 'country'), fieldWatching('other', 'unrelated')]
+    const result = clearVisibilityReferences(fields, 'country')
+    expect(result[0].visibleWhen).toBeUndefined()
+    expect(result[1].visibleWhen?.field).toBe('unrelated')
   })
 })

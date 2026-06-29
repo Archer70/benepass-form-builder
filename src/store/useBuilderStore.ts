@@ -2,7 +2,12 @@ import { create } from 'zustand'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { FieldType, FormField, FormSchema } from '@/lib/types'
 import { createSchema } from '@/lib/types'
-import { createDefaultField, reconcileFieldType } from '@/lib/fieldFactory'
+import {
+  cascadeFieldRename,
+  clearVisibilityReferences,
+  createDefaultField,
+  reconcileFieldType,
+} from '@/lib/fieldFactory'
 
 const DEFAULT_TITLE = 'Untitled form'
 
@@ -47,16 +52,9 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   removeField: (id) =>
     set((state) => {
       const removedName = state.fields.find((f) => f.id === id)?.name
-      // Drop the field, and clear any dangling visibleWhen references to it so
-      // dependents don't evaluate against a missing field (and so the schema
-      // stays re-importable). Mirrors the rename cascade in updateField.
-      const fields = state.fields
-        .filter((f) => f.id !== id)
-        .map((f) =>
-          removedName && f.visibleWhen?.field === removedName
-            ? { ...f, visibleWhen: undefined }
-            : f,
-        )
+      // Drop the field, then clear any dangling visibleWhen references to it.
+      let fields = state.fields.filter((f) => f.id !== id)
+      if (removedName) fields = clearVisibilityReferences(fields, removedName)
       const selectedId =
         state.selectedId === id ? (fields[0]?.id ?? null) : state.selectedId
       return { fields, selectedId }
@@ -65,21 +63,15 @@ export const useBuilderStore = create<BuilderState>((set, get) => ({
   updateField: (id, patch) =>
     set((state) => {
       const target = state.fields.find((f) => f.id === id)
-      // When a field is renamed, keep any visibleWhen references pointing at it.
-      const rename =
+      const renamedFrom =
         target && typeof patch.name === 'string' && patch.name !== target.name && target.name
-          ? { from: target.name, to: patch.name }
+          ? target.name
           : null
 
-      return {
-        fields: state.fields.map((f) => {
-          const updated = f.id === id ? { ...f, ...patch } : f
-          if (rename && updated.visibleWhen?.field === rename.from) {
-            return { ...updated, visibleWhen: { ...updated.visibleWhen, field: rename.to } }
-          }
-          return updated
-        }),
-      }
+      let fields = state.fields.map((f) => (f.id === id ? { ...f, ...patch } : f))
+      // Keep any visibleWhen references pointing at the field after a rename.
+      if (renamedFrom) fields = cascadeFieldRename(fields, renamedFrom, patch.name as string)
+      return { fields }
     }),
 
   changeFieldType: (id, type) =>

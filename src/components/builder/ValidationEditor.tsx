@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { FieldRow } from './FieldRow'
 import type { FormField, ValidationRules } from '@/lib/types'
-import { compileRegex } from '@/lib/buildZodSchema'
+import { compileRegex } from '@/lib/regex'
 import {
   CUSTOM_VALIDATORS,
   CUSTOM_VALIDATOR_KINDS,
